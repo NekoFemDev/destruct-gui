@@ -95,7 +95,7 @@ function validationMessage(code, detail) {
     case "noInput": return qsTr("Choose a file to decompile.")
     case "missingLibrary": return qsTr("Choose libil2cpp.so to pair with the metadata file.")
     case "inputMissing": return qsTr("The input file no longer exists.")
-    case "badSignature": return qsTr("This file does not look like a valid %1 file.").arg(detail)
+    case "badSignature": return qsTr("This file does not look like a valid %1 file.").arg(detail.toUpperCase())
     case "noCommand": return qsTr("This file type is not supported yet.")
     case "missingMetadata": return qsTr("IL2CPP needs global-metadata.dat as a second input.")
     case "metadataMissing": return qsTr("global-metadata.dat is missing or not a valid metadata file.")
