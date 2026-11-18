@@ -421,6 +421,11 @@ void Backend::setMetadataPath(const QString &path)
     } else if (m_command.isEmpty() && m_availableCommands.size() == 1) {
         setCommand(m_availableCommands.first());
     } else {
+        if (m_state != Running && m_files->totalCount() > 0) {
+            resetResults();
+            m_state = Idle;
+            emit stateChanged();
+        }
         refreshValidation();
     }
 }
@@ -611,6 +616,11 @@ void Backend::setCommand(const QString &command)
     m_command = command;
     resetOptions();
     emit commandChanged();
+    if (m_state != Running && m_files->totalCount() > 0) {
+        resetResults();
+        m_state = Idle;
+        emit stateChanged();
+    }
     refreshValidation();
 }
 

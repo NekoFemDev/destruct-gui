@@ -489,6 +489,12 @@ private slots:
         QCOMPARE(backend.files()->property("count").toInt(), 1);
         backend.filterFiles(QString());
         QCOMPARE(backend.files()->property("count").toInt(), 2);
+
+        // Switching to another action makes the old output stale.
+        backend.setCommand(QStringLiteral("il2cpp"));
+        QCOMPARE(backend.state(), int(Backend::Idle));
+        QCOMPARE(backend.fileCount(), 0);
+        QVERIFY(!backend.hasPreview());
     }
 
     void failedJobsSurfaceTheError()
