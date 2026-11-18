@@ -57,7 +57,7 @@ make build          # → ~/Work/DeStruct/destruct
 
 ```bash
 ./bin/build         # → build/destruct-gui
-./bin/test          # 29 тестов Qt: форматы, аргументы, процессы, поиск, тема, язык
+./bin/test          # 30 тестов Qt: форматы, аргументы, процессы, поиск, тема, язык
 ./build/destruct-gui [файл]
 ```
 

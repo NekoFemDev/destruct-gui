@@ -23,6 +23,20 @@ Item {
         backend.searchOutput(filterField.text, root.caseSensitive)
     }
 
+    // A new job produces a new file set; carrying the previous filter into it
+    // would make an empty list look like a failed run.
+    Connections {
+        target: backend
+        function onInputChanged() {
+            if (filterField.text !== "")
+                filterField.text = ""
+        }
+        function onStateChanged() {
+            if (backend.state === 1 && filterField.text !== "")
+                filterField.text = ""
+        }
+    }
+
     ColumnLayout {
         anchors.fill: parent
         spacing: 0

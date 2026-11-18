@@ -40,6 +40,21 @@ SectionCard {
                 border.color: outputField.activeFocus ? theme.accent : "#2e2e34"
             }
 
+            Text {
+                anchors {
+                    left: parent.left
+                    verticalCenter: parent.verticalCenter
+                    leftMargin: outputField.leftPadding + 2
+                    right: outputField.right
+                    rightMargin: outputField.rightPadding
+                }
+                visible: outputField.text === ""
+                text: qsTr("Choose an output folder")
+                color: "#686871"
+                font.pixelSize: 11
+                elide: Text.ElideRight
+            }
+
             Connections {
                 target: backend
                 function onOutputChanged() {

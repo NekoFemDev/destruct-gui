@@ -14,7 +14,9 @@ Item {
                 codeScroll.contentItem.contentY = 0
             return
         }
-        var lineHeight = Math.max(12, codeArea.font.pixelSize * 1.45)
+        var lineHeight = codeArea.lineCount > 0
+            ? codeArea.contentHeight / codeArea.lineCount
+            : Math.max(12, codeArea.font.pixelSize * 1.45)
         var target = Math.max(0, (line - 1) * lineHeight - 40)
         if (codeScroll.contentItem && codeScroll.contentItem.contentY !== undefined)
             codeScroll.contentItem.contentY = target
