@@ -151,8 +151,13 @@ ApplicationWindow {
     Connections {
         target: backend
         function onBinaryChanged() {
-            if (backend.binaryReady)
+            if (backend.binaryReady) {
                 win.setupVisible = false
+            } else if (!backend.binaryProbing && backend.binaryPath !== "") {
+                // A saved or discovered path that is not actually destruct
+                // is just as blocking as no path at all.
+                win.setupVisible = true
+            }
         }
     }
 
@@ -716,7 +721,7 @@ ApplicationWindow {
             color: "#232328"
             border.width: 1
             border.color: "#3b3b43"
-            z: 160
+            z: 220
 
             Text {
                 id: noticeText
