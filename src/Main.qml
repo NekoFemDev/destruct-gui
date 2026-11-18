@@ -24,6 +24,9 @@ ApplicationWindow {
     readonly property bool overlayOpen: helpVisible || quitConfirmVisible
     readonly property bool textEditing: activeFocusItem instanceof TextInput
                                           || activeFocusItem instanceof TextEdit
+    // Space belongs to a focused Material control (a ComboBox, for example),
+    // so the global Run shortcut steps aside while one owns the keyboard.
+    readonly property bool spaceBlocked: textEditing || activeFocusItem instanceof Control
 
     property string tab: "preview"
     property bool helpVisible: false
@@ -57,7 +60,7 @@ ApplicationWindow {
     Shortcut {
         sequence: "Space"
         context: Qt.ApplicationShortcut
-        enabled: !win.textEditing && !win.overlayOpen && !backend.running && backend.canRun
+        enabled: !win.spaceBlocked && !win.overlayOpen && !backend.running && backend.canRun
         onActivated: backend.run()
     }
 

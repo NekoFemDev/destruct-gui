@@ -10,6 +10,8 @@ Item {
 
     visible: shown
     z: 200
+    LayoutMirroring.enabled: Qt.application.layoutDirection === Qt.RightToLeft
+    LayoutMirroring.childrenInherit: true
 
     Rectangle {
         anchors.fill: parent

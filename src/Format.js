@@ -159,3 +159,9 @@ function directoryName(path) {
     var cut = Math.max(path.lastIndexOf('/'), path.lastIndexOf('\\'))
     return cut > 0 ? path.substring(0, cut) : ""
 }
+
+function stem(path) {
+    var name = baseName(path)
+    var dot = name.lastIndexOf('.')
+    return dot > 0 ? name.substring(0, dot) : name
+}

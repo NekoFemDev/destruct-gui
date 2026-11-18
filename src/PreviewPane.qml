@@ -125,6 +125,7 @@ Item {
 
                 TextArea {
                     id: codeArea
+                    LayoutMirroring.enabled: false
                     text: backend.previewText
                     readOnly: true
                     selectByMouse: true

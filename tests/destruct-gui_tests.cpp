@@ -87,7 +87,7 @@ for arg in "$@"; do
     prev="$arg"
 done
 [ -n "$out" ] || exit 2
-mkdir -p "$out"
+[ -d "$out" ] || { echo "Error: output folder was not created" >&2; exit 3; }
 echo "Parsed fake ELF"
 printf '// fake output\nint sub_1000(void) {\n    return 42;\n}\n' > "$out/libtest.decompiled.c"
 printf '{"ok": true}\n' > "$out/functions.json"

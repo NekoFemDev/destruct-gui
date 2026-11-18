@@ -119,6 +119,7 @@ Item {
 
                     Text {
                         id: logLine
+                        LayoutMirroring.enabled: false
                         x: 14
                         y: 1
                         width: parent.width - 28

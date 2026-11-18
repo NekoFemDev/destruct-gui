@@ -75,12 +75,23 @@ Item {
     HoverHandler { id: hover; enabled: root.available }
 
     MouseArea {
+        id: toggleArea
         anchors.fill: parent
         enabled: root.available
         cursorShape: Qt.PointingHandCursor
         activeFocusOnTab: root.available
         onClicked: root.toggled()
-        Keys.onSpacePressed: root.toggled()
+        // Space is the window's Run shortcut, so Enter is the keyboard way
+        // to flip a focused option.
         Keys.onReturnPressed: root.toggled()
+        Keys.onEnterPressed: root.toggled()
+    }
+
+    Rectangle {
+        anchors.fill: parent
+        color: "transparent"
+        border.width: toggleArea.activeFocus ? 1 : 0
+        border.color: theme.accent
+        radius: Math.min(4, theme.radius)
     }
 }

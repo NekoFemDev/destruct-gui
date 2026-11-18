@@ -833,6 +833,15 @@ void Backend::run()
     m_logModel->clear();
     resetResults();
 
+    if (!QDir().mkpath(m_outputPath)) {
+        m_errorText = tr("Could not create the output folder: %1").arg(m_outputPath);
+        appendLog(QStringLiteral("Error: ") + m_errorText);
+        m_state = Failed;
+        emit stateChanged();
+        refreshValidation();
+        return;
+    }
+
     appendLog(QStringLiteral("$ ") + commandLine());
     m_state = Running;
     m_elapsed.start();
@@ -1239,6 +1248,13 @@ void Backend::useRecent(const QString &path)
 {
     if (running())
         return;
+    if (!QFileInfo(path).isFile()) {
+        m_recentFiles.removeAll(path);
+        saveRecent();
+        emit recentFilesChanged();
+        showNotice(tr("That file is no longer there."));
+        return;
+    }
     setInputPath(path);
 }
 

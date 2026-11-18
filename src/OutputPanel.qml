@@ -62,7 +62,7 @@ SectionCard {
         Text {
             Layout.fillWidth: true
             text: backend.command === "js"
-                  ? qsTr("Writes %1 inside this folder.").arg(Format.baseName(backend.inputPath) + ".deobf.js")
+                  ? qsTr("Writes %1 inside this folder.").arg(Format.stem(backend.inputPath) + ".deobf.js")
                   : qsTr("Existing files are overwritten.")
             color: "#6f6f78"
             font.pixelSize: 10
