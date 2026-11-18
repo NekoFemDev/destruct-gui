@@ -211,8 +211,16 @@ ApplicationWindow {
                     spacing: 10
 
                     Image {
-                        width: 34
-                        height: 34
+                        // Layouts read a child's implicit size, so the icon
+                        // must declare it here; a plain width/height would let
+                        // the SVG's 102 px source size inflate the header.
+                        Layout.preferredWidth: 34
+                        Layout.preferredHeight: 34
+                        Layout.minimumWidth: 34
+                        Layout.minimumHeight: 34
+                        Layout.maximumWidth: 34
+                        Layout.maximumHeight: 34
+                        Layout.alignment: Qt.AlignVCenter
                         source: "qrc:/destruct-gui.svg"
                         sourceSize.width: 102
                         sourceSize.height: 102
@@ -243,6 +251,7 @@ ApplicationWindow {
                         id: binaryPill
                         implicitWidth: binaryRow.implicitWidth + 22
                         implicitHeight: 28
+                        Layout.alignment: Qt.AlignVCenter
                         radius: Math.min(4, theme.radius)
                         color: binaryHover.hovered ? "#202025" : "#17171a"
                         border.width: 1
@@ -299,12 +308,14 @@ ApplicationWindow {
                     Rectangle {
                         width: 1
                         height: 20
+                        Layout.alignment: Qt.AlignVCenter
                         color: "#2a2a30"
                     }
 
                     Rectangle {
                         width: 28
                         height: 28
+                        Layout.alignment: Qt.AlignVCenter
                         radius: Math.min(4, theme.radius)
                         color: helpHover.hovered ? "#242429" : "transparent"
 
