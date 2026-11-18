@@ -1,0 +1,11 @@
+/build/
+/pkgbuild/pkg/
+/pkgbuild/src/
+*.pkg.tar.*
+*.o
+moc_*.cpp
+moc_*.h
+qrc_*.cpp
+.qmake.stash
+/Makefile
+/destruct-gui

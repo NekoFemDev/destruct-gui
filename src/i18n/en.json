@@ -1,0 +1,10 @@
+{
+  "%n files": {
+    "one": "%n file",
+    "other": "%n files"
+  },
+  "%n matches": {
+    "one": "%n match",
+    "other": "%n matches"
+  }
+}
