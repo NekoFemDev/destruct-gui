@@ -136,6 +136,7 @@
   "Missing tools: %1. Install them with omarchy-pkg-add %2, then try again.": "Не хватает инструментов: %1. Установите их командой omarchy-pkg-add %2 и повторите попытку.",
   "More options": "Больше опций",
   "Name values arg0..arg7 and var_N instead of x0/w0.": "Называть значения arg0..arg7 и var_N вместо x0/w0.",
+  "Needs curl, tar, make, Go, and a C compiler. The first build also downloads Capstone, so it can take a few minutes. The source and binary stay in this folder; Go uses its usual caches.": "Нужны curl, tar, make, Go и компилятор C. При первой сборке также скачивается Capstone, поэтому это может занять несколько минут. Исходники и бинарник остаются в этой папке; Go использует свои обычные кэши.",
   "No files yet. Run the action to produce output": "Файлов пока нет. Запустите действие, чтобы получить вывод",
   "No location comments": "Без комментариев расположения",
   "No matches": "Совпадений нет",
@@ -233,6 +234,5 @@
   "destruct stopped unexpectedly.": "destruct неожиданно остановился.",
   "global-metadata.dat is missing or not a valid metadata file.": "global-metadata.dat отсутствует или не является корректным файлом метаданных.",
   "multi-format decompiler": "мультиформатный декомпилятор",
-  "or press Ctrl+O": "или нажмите Ctrl+O",
-  "Нужны curl, tar, make, Go и компилятор C. При первой сборке также скачивается Capstone, поэтому это может занять несколько минут. Исходники и бинарник остаются в этой папке; Go использует свои обычные кэши.": "Нужны curl, tar, make, Go и компилятор C. При первой сборке также скачивается Capstone, поэтому это может занять несколько минут. Исходники и бинарник остаются в этой папке; Go использует свои обычные кэши."
+  "or press Ctrl+O": "или нажмите Ctrl+O"
 }
