@@ -342,7 +342,7 @@ ApplicationWindow {
                             clip: true
                             contentWidth: availableWidth
                             ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
-                            ScrollBar.vertical.policy: ScrollBar.AlwaysOn
+                            ScrollBar.vertical.policy: ScrollBar.AsNeeded
 
                             ColumnLayout {
                                 width: leftScroll.availableWidth
