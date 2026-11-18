@@ -128,7 +128,7 @@ Item {
             Text {
                 Layout.fillWidth: true
                 visible: root.ask
-                text: qsTr("Needs curl, tar, make, Go, and a C compiler. The first build also downloads Capstone, so it can take a few minutes. Nothing outside this folder is touched.")
+                text: qsTr("Needs curl, tar, make, Go, and a C compiler. The first build also downloads Capstone, so it can take a few minutes. The source and binary stay in this folder; Go uses its usual caches.")
                 color: "#777780"
                 font.pixelSize: 10
                 wrapMode: Text.Wrap

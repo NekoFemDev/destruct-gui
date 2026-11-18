@@ -51,8 +51,9 @@ If none is found, the first-run dialog offers two choices:
 - **Download and build** — downloads the DeStruct source from GitHub and
   builds `destruct` into `~/.local/share/destruct/destruct-gui/DeStruct`.
   This needs `curl`, `tar`, `make`, Go, and a C compiler. The first build also
-  downloads and compiles Capstone, so it can take a few minutes. Nothing
-  outside that folder is modified. This is the only network action, and it
+  downloads and compiles Capstone, so it can take a few minutes. The source
+  and binary stay in that folder; the Go toolchain uses its usual module and
+  build caches. This is the only network action, and it
   never starts without your click.
 - **Choose binary...** — point the GUI at an existing `destruct` binary.
 
@@ -142,8 +143,9 @@ existing and future DeStruct flag behaves exactly as it does in a terminal.
   seconds.
 - The preview reads at most 2 MB per file and refuses paths outside the output
   folder.
-- Setup downloads only into the app's own data directory and removes its
-  temporary files on failure or cancellation.
+- Setup downloads into the app's own data directory and removes its temporary
+  files on failure or cancellation. The Go toolchain uses its usual module and
+  build caches.
 
 ## Limitations
 
