@@ -261,9 +261,10 @@ QStringList arguments(const JobOptions &options)
         }
     }
 
-    if (options.command == QStringLiteral("elf")) {
-        if (options.decompile)
-            args << QStringLiteral("--decompile");
+    if (options.command == QStringLiteral("elf") && options.decompile) {
+        // Every one of these flags only makes sense on the decompiler path;
+        // passing one with --decompile off would silently flip it back on.
+        args << QStringLiteral("--decompile");
         if (options.splitFunctions)
             args << QStringLiteral("--split-functions");
         if (options.crossReferences)

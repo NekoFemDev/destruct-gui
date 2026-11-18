@@ -271,6 +271,24 @@ private slots:
         }));
     }
 
+    void decompileOnlyFlagsStayOffWithoutDecompilation()
+    {
+        formats::JobOptions options;
+        options.command = QStringLiteral("elf");
+        options.input = QStringLiteral("lib.so");
+        options.output = QStringLiteral("out");
+        options.decompile = false;
+        options.splitFunctions = true;
+        options.emitLLVM = true;
+        options.offsets = QStringLiteral("dump");
+
+        const QStringList args = formats::arguments(options);
+        QVERIFY(!args.contains(QStringLiteral("--decompile")));
+        QVERIFY(!args.contains(QStringLiteral("--split-functions")));
+        QVERIFY(!args.contains(QStringLiteral("--emit-llvm")));
+        QVERIFY(!args.contains(QStringLiteral("--il2cpp-offsets")));
+    }
+
     void buildsIl2cppArgumentsInLibraryOrder()
     {
         formats::JobOptions options;

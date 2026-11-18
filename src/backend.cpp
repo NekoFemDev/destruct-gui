@@ -782,7 +782,8 @@ void Backend::refreshValidation()
         } else if (m_command == QStringLiteral("elf") && m_decompile && !m_info.aarch64) {
             code = QStringLiteral("notAarch64");
             detail = m_info.architecture;
-        } else if (!m_offsetsPath.isEmpty() && !QFileInfo::exists(m_offsetsPath)) {
+        } else if (m_command == QStringLiteral("elf") && m_decompile
+                   && !m_offsetsPath.isEmpty() && !QFileInfo::exists(m_offsetsPath)) {
             code = QStringLiteral("offsetsMissing");
             detail = m_offsetsPath;
         } else if (m_outputPath.isEmpty()) {
