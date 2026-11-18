@@ -1,5 +1,6 @@
 #include "backend.h"
 
+#include "destructsetup.h"
 #include "filelistmodel.h"
 #include "filepicker.h"
 #include "logmodel.h"
@@ -46,6 +47,7 @@ QString absolutePath(const QString &path)
 Backend::Backend(FilePicker *filePicker, QObject *parent)
     : QObject(parent),
       m_picker(filePicker ? filePicker : new PortalFilePicker(this)),
+      m_setup(new DestructSetup({}, this)),
       m_files(new FileListModel(this)),
       m_logModel(new LogModel(this)),
       m_searchModel(new SearchModel(this))
@@ -99,7 +101,10 @@ Backend::Backend(FilePicker *filePicker, QObject *parent)
         m_probeTimeout.stop();
         const QString output = QString::fromUtf8(m_probe.readAllStandardOutput()).trimmed();
         m_binaryProbing = false;
-        m_binaryReady = code == 0 && status == QProcess::NormalExit;
+        // A random executable can answer `version`, but only DeStruct's own
+        // output proves this is actually the decompiler the window drives.
+        m_binaryReady = code == 0 && status == QProcess::NormalExit
+            && output.contains(QStringLiteral("DeStruct"));
         m_binaryVersion.clear();
         if (m_binaryReady) {
             const QStringList lines = output.split(QLatin1Char('\n'));
@@ -132,6 +137,10 @@ Backend::Backend(FilePicker *filePicker, QObject *parent)
 
     connect(m_searchModel, &SearchModel::countChanged, this,
             &Backend::searchCountChanged);
+    connect(m_setup, &DestructSetup::installed, this, [this](const QString &path) {
+        setBinaryPath(path);
+        showNotice(tr("DeStruct is ready."));
+    });
 
     QSettings settings;
     m_recentFiles = settings.value(QStringLiteral("recentFiles")).toStringList();
@@ -191,6 +200,11 @@ qint64 Backend::elapsedMs() const
 QObject *Backend::files() const
 {
     return m_files;
+}
+
+QObject *Backend::setup() const
+{
+    return m_setup;
 }
 
 QObject *Backend::log() const
@@ -471,12 +485,17 @@ void Backend::discoverBinary()
     QStringList candidates;
     if (!configured.isEmpty())
         candidates << configured;
+    // Deliberately no developer-specific checkout paths: the system
+    // location comes first, then whatever the user's PATH already resolves.
+    candidates << QStringLiteral("/usr/bin/destruct");
     const QString onPath = QStandardPaths::findExecutable(QStringLiteral("destruct"));
     if (!onPath.isEmpty())
         candidates << onPath;
-    candidates << QDir::homePath() + QStringLiteral("/Work/DeStruct/destruct")
-               << QDir::homePath() + QStringLiteral("/DeStruct/destruct")
-               << QStringLiteral("/usr/local/bin/destruct");
+    candidates << QStringLiteral("/usr/local/bin/destruct");
+    // A copy built by the setup dialog lives under the app's data folder.
+    // Finding it here makes that build survive lost settings and later runs.
+    candidates << QDir(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation))
+                      .filePath(QStringLiteral("DeStruct/destruct"));
     candidates.removeDuplicates();
 
     for (const QString &candidate : candidates) {
@@ -498,11 +517,14 @@ void Backend::setBinaryPath(const QString &path)
     const QString absolute = absolutePath(path);
     if (absolute.isEmpty())
         return;
+    const QFileInfo info(absolute);
+    if (!info.isFile() || !info.isExecutable()) {
+        showNotice(tr("That file is not executable. Choose the destruct binary itself."));
+        return;
+    }
     m_binaryPath = absolute;
     QSettings settings;
     settings.setValue(QStringLiteral("binaryPath"), absolute);
-    if (!QFileInfo(absolute).isExecutable())
-        showNotice(tr("That file is not executable. Choose the destruct binary itself."));
     emit binaryChanged();
     probeBinary();
 }

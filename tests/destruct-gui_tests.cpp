@@ -5,6 +5,7 @@
 #include <QtTest>
 
 #include "backend.h"
+#include "destructsetup.h"
 #include "filelistmodel.h"
 #include "filepicker.h"
 #include "formats.h"
@@ -12,6 +13,26 @@
 #include "translator.h"
 
 namespace {
+
+// Restores an environment variable when the test scope ends.
+class EnvGuard {
+public:
+    EnvGuard(const QByteArray &name, const QByteArray &value) : m_name(name), m_old(qgetenv(name))
+    {
+        qputenv(name, value);
+    }
+    ~EnvGuard()
+    {
+        if (m_old.isNull())
+            qunsetenv(m_name);
+        else
+            qputenv(m_name, m_old);
+    }
+
+private:
+    QByteArray m_name;
+    QByteArray m_old;
+};
 
 class FakePicker : public FilePicker {
     Q_OBJECT
@@ -70,6 +91,29 @@ QByteArray peHeader(quint16 machine)
 
 // A shell script that behaves like destruct for the two commands the GUI
 // cares about in tests: version, and a successful ELF run that writes files.
+void writeExecutable(const QString &path, const QByteArray &contents)
+{
+    writeFile(path, contents);
+    QVERIFY(QFile::setPermissions(path, QFile::ReadOwner | QFile::WriteOwner
+                                            | QFile::ExeOwner));
+}
+
+// Enough of a toolchain for DestructSetup to drive its whole state machine
+// without network access: curl and tar succeed, make writes a destruct that
+// answers `version`, and the compiler stands in for the C toolchain.
+void writeFakeTools(const QString &directory)
+{
+    writeExecutable(directory + "/curl", "#!/bin/sh\nexit 0\n");
+    writeExecutable(directory + "/tar", "#!/bin/sh\nexit 0\n");
+    writeExecutable(directory + "/go", "#!/bin/sh\nexit 0\n");
+    writeExecutable(directory + "/cc", "#!/bin/sh\nexit 0\n");
+    writeExecutable(directory + "/make", R"(#!/bin/sh
+printf '#!/bin/sh\necho "DeStruct v9.9.9"\nexit 0\n' > destruct
+/bin/chmod +x destruct
+exit 0
+)");
+}
+
 QString fakeDestruct(const QTemporaryDir &dir, bool succeed = true, bool slow = false)
 {
     const QString path = dir.filePath(succeed ? (slow ? "destruct-slow" : "destruct-ok")
@@ -320,6 +364,18 @@ private slots:
     // ------------------------------------------------------------------
     // Backend state
     // ------------------------------------------------------------------
+    void locatingANonExecutableIsRefused()
+    {
+        FakePicker picker;
+        Backend backend(&picker);
+        QTemporaryDir dir;
+        const QString path = dir.filePath("not-a-binary");
+        writeFile(path, "hello");
+        backend.setBinaryPath(path);
+        QVERIFY(!backend.binaryReady());
+        QVERIFY(backend.binaryPath() != path);
+    }
+
     void settingInputChoosesTheMatchingCommand()
     {
         FakePicker picker;
@@ -464,6 +520,46 @@ private slots:
         QTemporaryDir dir;
         backend.acceptDrop(QUrl::fromLocalFile(dir.path()));
         QCOMPARE(backend.outputPath(), QDir::cleanPath(dir.path()));
+    }
+
+    // ------------------------------------------------------------------
+    // Downloading and building destruct
+    // ------------------------------------------------------------------
+    void setupRefusesToRunWithoutTools()
+    {
+        QTemporaryDir data;
+        QTemporaryDir emptyTools;
+        EnvGuard path("PATH", emptyTools.path().toUtf8());
+
+        DestructSetup setup(data.path());
+        setup.install();
+
+        QVERIFY(!setup.running());
+        QVERIFY(!setup.succeeded());
+        QVERIFY(setup.error().contains(QStringLiteral("Missing tools")));
+        QVERIFY(setup.log()->property("count").toInt() > 0);
+        QVERIFY(!QFileInfo::exists(setup.binaryPath()));
+    }
+
+    void setupDownloadsBuildsAndInstalls()
+    {
+        QTemporaryDir data;
+        QTemporaryDir tools;
+        writeFakeTools(tools.path());
+        EnvGuard path("PATH", tools.path().toUtf8());
+
+        DestructSetup setup(data.path());
+        QSignalSpy installed(&setup, &DestructSetup::installed);
+        setup.install();
+
+        QTRY_VERIFY_WITH_TIMEOUT(!setup.running(), 10000);
+        QVERIFY2(setup.succeeded(), qPrintable(setup.error()));
+        QCOMPARE(setup.error(), QString());
+        QCOMPARE(installed.count(), 1);
+        QCOMPARE(installed.first().first().toString(), setup.binaryPath());
+        QVERIFY(QFileInfo(setup.binaryPath()).isExecutable());
+        QVERIFY(QFileInfo::exists(setup.sourceDirectory()));
+        QVERIFY(setup.log()->property("count").toInt() > 0);
     }
 
     // ------------------------------------------------------------------

@@ -21,7 +21,7 @@ ApplicationWindow {
     readonly property string accent: theme.accent
     readonly property string accentFg: theme.accentForeground
     readonly property bool rtl: Qt.application.layoutDirection === Qt.RightToLeft
-    readonly property bool overlayOpen: helpVisible || quitConfirmVisible
+    readonly property bool overlayOpen: helpVisible || quitConfirmVisible || setupVisible
     readonly property bool textEditing: activeFocusItem instanceof TextInput
                                           || activeFocusItem instanceof TextEdit
     // Space belongs to a focused Material control (a ComboBox, for example),
@@ -33,14 +33,20 @@ ApplicationWindow {
     property bool quitConfirmVisible: false
     property bool quitConfirmed: false
     property bool dragHover: false
+    property bool setupVisible: false
 
     readonly property int tabIndex: tab === "preview" ? 0 : tab === "files" ? 1 : 2
 
     function requestQuit() {
-        if (backend.running)
+        if (backend.running || backend.setup.running)
             quitConfirmVisible = true
         else
             Qt.quit()
+    }
+
+    Component.onCompleted: {
+        if (!backend.binaryReady && !backend.binaryProbing)
+            setupVisible = true
     }
 
     function openSelectedFile(path, line) {
@@ -74,7 +80,7 @@ ApplicationWindow {
     Shortcut {
         sequence: "?"
         context: Qt.ApplicationShortcut
-        enabled: !win.textEditing
+        enabled: !win.textEditing && !win.setupVisible
         onActivated: win.helpVisible = !win.helpVisible
     }
 
@@ -86,7 +92,10 @@ ApplicationWindow {
                 win.helpVisible = false
             else if (win.quitConfirmVisible)
                 win.quitConfirmVisible = false
-            else if (backend.running)
+            else if (win.setupVisible) {
+                if (!backend.setup.running)
+                    win.setupVisible = false
+            } else if (backend.running)
                 backend.cancel()
         }
     }
@@ -133,9 +142,17 @@ ApplicationWindow {
     }
 
     onClosing: function(close) {
-        if (backend.running && !win.quitConfirmed) {
+        if ((backend.running || backend.setup.running) && !win.quitConfirmed) {
             close.accepted = false
             win.quitConfirmVisible = true
+        }
+    }
+
+    Connections {
+        target: backend
+        function onBinaryChanged() {
+            if (backend.binaryReady)
+                win.setupVisible = false
         }
     }
 
@@ -251,7 +268,7 @@ ApplicationWindow {
                                         ? (backend.binaryVersion !== ""
                                            ? "destruct " + backend.binaryVersion
                                            : qsTr("destruct ready"))
-                                        : qsTr("Locate destruct")
+                                        : qsTr("Set up destruct")
                                 color: backend.binaryReady ? "#a9c5ad" : "#d8b080"
                                 font.pixelSize: 10
                                 font.family: "monospace"
@@ -264,14 +281,19 @@ ApplicationWindow {
                             anchors.fill: parent
                             enabled: !backend.running
                             cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-                            onClicked: backend.chooseBinary()
+                            onClicked: {
+                                if (backend.binaryReady)
+                                    backend.chooseBinary()
+                                else
+                                    win.setupVisible = true
+                            }
                         }
 
                         ToolTip.visible: binaryHover.hovered
                         ToolTip.delay: 400
                         ToolTip.text: backend.binaryPath !== ""
                                       ? backend.binaryPath
-                                      : qsTr("Choose the destruct binary")
+                                      : qsTr("Download or choose the DeStruct CLI")
                     }
 
                     Rectangle {
@@ -384,15 +406,26 @@ ApplicationWindow {
                             maximumLineCount: 1
                         }
 
-                        Text {
+                        RowLayout {
                             Layout.fillWidth: true
                             visible: (backend.inputPath !== "" || backend.metadataPath !== "")
                                      && backend.validationCode !== "" && !backend.running
-                            text: Format.validationMessage(backend.validationCode,
-                                                           backend.validationDetail)
-                            color: "#ff8a80"
-                            font.pixelSize: 10
-                            wrapMode: Text.Wrap
+                            spacing: 8
+
+                            Text {
+                                Layout.fillWidth: true
+                                text: Format.validationMessage(backend.validationCode,
+                                                               backend.validationDetail)
+                                color: "#ff8a80"
+                                font.pixelSize: 10
+                                wrapMode: Text.Wrap
+                            }
+
+                            TextButton {
+                                visible: backend.validationCode === "missingBinary"
+                                text: qsTr("Set up")
+                                onClicked: win.setupVisible = true
+                            }
                         }
 
                         ActionButton {
@@ -656,6 +689,7 @@ ApplicationWindow {
         DropArea {
             anchors.fill: parent
             z: 151
+            enabled: !win.overlayOpen
 
             onEntered: win.dragHover = true
             onExited: win.dragHover = false
@@ -705,6 +739,12 @@ ApplicationWindow {
         }
     }
 
+    SetupDialog {
+        anchors.fill: parent
+        shown: win.setupVisible
+        onClosed: win.setupVisible = false
+    }
+
     ShortcutsOverlay {
         anchors.fill: parent
         shown: win.helpVisible
@@ -714,9 +754,11 @@ ApplicationWindow {
     ConfirmQuit {
         anchors.fill: parent
         shown: win.quitConfirmVisible
+        settingUp: backend.setup.running
         onCancelled: win.quitConfirmVisible = false
         onConfirmed: {
             win.quitConfirmed = true
+            backend.setup.cancel()
             backend.cancel()
             Qt.quit()
         }

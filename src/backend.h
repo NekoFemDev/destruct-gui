@@ -13,6 +13,7 @@
 
 #include "formats.h"
 
+class DestructSetup;
 class FileListModel;
 class FilePicker;
 class LogModel;
@@ -85,6 +86,7 @@ class Backend : public QObject {
     Q_PROPERTY(QString binaryVersion READ binaryVersion NOTIFY binaryChanged)
     Q_PROPERTY(bool binaryReady READ binaryReady NOTIFY binaryChanged)
     Q_PROPERTY(bool binaryProbing READ binaryProbing NOTIFY binaryChanged)
+    Q_PROPERTY(QObject *setup READ setup CONSTANT)
 
     Q_PROPERTY(QStringList recentFiles READ recentFiles NOTIFY recentFilesChanged)
 
@@ -165,6 +167,7 @@ public:
     QString binaryVersion() const { return m_binaryVersion; }
     bool binaryReady() const { return m_binaryReady; }
     bool binaryProbing() const { return m_binaryProbing; }
+    QObject *setup() const;
 
     QStringList recentFiles() const { return m_recentFiles; }
 
@@ -269,6 +272,7 @@ private:
     static QString trimmedError(const QString &line);
 
     FilePicker *m_picker = nullptr;
+    DestructSetup *m_setup = nullptr;
     FileListModel *m_files = nullptr;
     LogModel *m_logModel = nullptr;
     SearchModel *m_searchModel = nullptr;

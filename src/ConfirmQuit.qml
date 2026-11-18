@@ -6,6 +6,7 @@ import QtQuick.Layouts
 Item {
     id: root
     property bool shown: false
+    property bool settingUp: false
     signal cancelled()
     signal confirmed()
 
@@ -43,7 +44,8 @@ Item {
 
             Text {
                 Layout.fillWidth: true
-                text: qsTr("A job is running")
+                text: root.settingUp ? qsTr("Setup is running")
+                                     : qsTr("A job is running")
                 color: "#f0f0f3"
                 font.pixelSize: 16
                 font.bold: true
@@ -51,7 +53,9 @@ Item {
 
             Text {
                 Layout.fillWidth: true
-                text: qsTr("Quitting stops the destruct process and discards its unfinished output.")
+                text: root.settingUp
+                      ? qsTr("Quitting stops the DeStruct download or build. You can run setup again later.")
+                      : qsTr("Quitting stops the destruct process and discards its unfinished output.")
                 color: "#a0a0a9"
                 font.pixelSize: 12
                 wrapMode: Text.Wrap
@@ -72,8 +76,9 @@ Item {
                 }
 
                 ActionButton {
-                    implicitWidth: 178
-                    text: qsTr("Cancel and quit")
+                    implicitWidth: 190
+                    text: root.settingUp ? qsTr("Stop and quit")
+                                         : qsTr("Cancel and quit")
                     danger: true
                     primary: false
                     onClicked: root.confirmed()

@@ -90,7 +90,7 @@ function stateLabel(state) {
 
 function validationMessage(code, detail) {
     switch (code) {
-    case "missingBinary": return qsTr("The destruct binary was not found. Locate it with the status button in the header, or build it with make build in the DeStruct checkout.")
+    case "missingBinary": return qsTr("The destruct CLI was not found. Download and build it, or choose an existing binary.")
     case "probingBinary": return qsTr("Checking the destruct binary...")
     case "noInput": return qsTr("Choose a file to decompile.")
     case "missingLibrary": return qsTr("Choose libil2cpp.so to pair with the metadata file.")

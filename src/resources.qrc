@@ -13,6 +13,7 @@
         <file alias="PaneTab.qml">PaneTab.qml</file>
         <file alias="PreviewPane.qml">PreviewPane.qml</file>
         <file alias="SectionCard.qml">SectionCard.qml</file>
+        <file alias="SetupDialog.qml">SetupDialog.qml</file>
         <file alias="ShortcutsOverlay.qml">ShortcutsOverlay.qml</file>
         <file alias="TextButton.qml">TextButton.qml</file>
         <file alias="WelcomePane.qml">WelcomePane.qml</file>

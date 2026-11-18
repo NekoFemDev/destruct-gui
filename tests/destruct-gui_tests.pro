@@ -8,6 +8,7 @@ INCLUDEPATH += ../src
 
 HEADERS += \
     ../src/backend.h \
+    ../src/destructsetup.h \
     ../src/filelistmodel.h \
     ../src/filepicker.h \
     ../src/formats.h \
@@ -20,6 +21,7 @@ HEADERS += \
 SOURCES += \
     destruct-gui_tests.cpp \
     ../src/backend.cpp \
+    ../src/destructsetup.cpp \
     ../src/filelistmodel.cpp \
     ../src/formats.cpp \
     ../src/logmodel.cpp \
