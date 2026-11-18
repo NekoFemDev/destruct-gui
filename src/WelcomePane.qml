@@ -23,20 +23,15 @@ Item {
             anchors.horizontalCenter: parent.horizontalCenter
             spacing: 22
 
-            Rectangle {
+            Image {
                 anchors.horizontalCenter: parent.horizontalCenter
-                width: 54
-                height: 54
-                radius: Math.min(10, theme.radius)
-                color: theme.accent
-
-                Text {
-                    anchors.centerIn: parent
-                    text: "D"
-                    color: theme.accentForeground
-                    font.pixelSize: 28
-                    font.bold: true
-                }
+                width: 64
+                height: 64
+                source: "qrc:/destruct-gui.svg"
+                sourceSize.width: 160
+                sourceSize.height: 160
+                smooth: true
+                fillMode: Image.PreserveAspectFit
             }
 
             Column {

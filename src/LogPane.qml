@@ -26,8 +26,8 @@ Item {
                     height: 6
                     radius: 3
                     Layout.alignment: Qt.AlignVCenter
-                    color: backend.state === 1 ? theme.accent
-                         : backend.state === 2 ? "#7bd88f"
+                    color: backend.state === 1 ? theme.brandAccent
+                         : backend.state === 2 ? theme.brandAccent
                          : backend.state === 3 ? "#ff7b72"
                          : backend.state === 4 ? "#e5b567" : "#5d5d66"
                 }
@@ -130,8 +130,8 @@ Item {
                         font.pixelSize: 11
                         color: model.kind === 1 ? "#ff8a80"
                              : model.kind === 2 ? "#e5b567"
-                             : model.kind === 3 ? theme.accent
-                             : model.kind === 4 ? "#8fd18f" : "#b9b9c2"
+                             : model.kind === 3 ? theme.brandAccent
+                             : model.kind === 4 ? "#c9b95a" : "#b9b9c2"
                     }
                 }
             }

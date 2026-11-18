@@ -24,7 +24,7 @@ Item {
         anchors.bottom: parent.bottom
         width: parent.width
         height: 2
-        color: root.active ? theme.accent : "transparent"
+        color: root.active ? theme.brandAccent : "transparent"
     }
 
     HoverHandler { id: hover }

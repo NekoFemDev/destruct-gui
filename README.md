@@ -26,10 +26,10 @@ terminal and a text editor.
 - **Searches inside every output file** — type in the filter field and press
   Enter. Results are clickable and open the preview at the matching line.
   The scan runs in the background and does not freeze the window.
-- **Follows Omarchy** — the accent and Hyprland's window rounding come from
-  the current theme and update live. The interface language comes from Setup
-  > Language, with Russian and English catalogs; other languages fall back to
-  English string by string.
+- **Keeps its own palette** — the icon's yellow and near-black run through
+  the buttons, tabs, toggles, and status dots. Hyprland's window rounding and
+  Omarchy's language still update live; the interface ships Russian and
+  English catalogs and falls back to English string by string.
 - **Works with mouse and keyboard** — drop a file anywhere in the window,
   `Ctrl+O`, `Space`, `?`, open a file from a file manager
   (`destruct-gui file.apk`), and the last eight successful runs are remembered.
@@ -71,7 +71,7 @@ somewhere on `PATH`, for example `/usr/bin/destruct`.
 ## Build and install the GUI
 
 Requires Arch Linux/Omarchy with `qt6-base`, `qt6-declarative`, `qt6-wayland`,
-and `xdg-desktop-portal` (all present on Omarchy).
+`qt6-svg`, and `xdg-desktop-portal` (all present on Omarchy).
 
 ```bash
 ./bin/build         # → build/destruct-gui
@@ -118,7 +118,7 @@ src/formats.{h,cpp}     pure format sniffing and argv construction
 src/filelistmodel.*     flat, filterable output file list
 src/logmodel.*          live log and setup log
 src/searchmodel.*       in-output search results
-src/theme.*             Omarchy accent + Hyprland rounding
+src/theme.*             icon palette + Hyprland rounding
 src/translator.*        Omarchy language, JSON catalogs, plural rules
 src/portalfilepicker.*  file dialogs over XDG Desktop Portal
 src/Main.qml            window, keys, layout

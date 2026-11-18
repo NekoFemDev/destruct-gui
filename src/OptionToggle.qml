@@ -27,7 +27,7 @@ Item {
         width: 32
         height: 18
         radius: 9
-        color: root.active && root.available ? theme.accent : "#35353d"
+        color: root.active && root.available ? theme.brandAccent : "#35353d"
 
         Behavior on color { ColorAnimation { duration: 90 } }
 
@@ -38,7 +38,7 @@ Item {
             width: 14
             height: 14
             radius: 7
-            color: root.active ? theme.accentForeground : "#a4a4ac"
+            color: root.active ? theme.brandAccentForeground : "#a4a4ac"
 
             Behavior on x { NumberAnimation { duration: 110; easing.type: Easing.OutCubic } }
             Behavior on color { ColorAnimation { duration: 90 } }
@@ -91,7 +91,7 @@ Item {
         anchors.fill: parent
         color: "transparent"
         border.width: toggleArea.activeFocus ? 1 : 0
-        border.color: theme.accent
+        border.color: theme.brandAccent
         radius: Math.min(4, theme.radius)
     }
 }

@@ -12,7 +12,7 @@ SectionCard {
     readonly property bool elf: backend.command === "elf"
 
     Material.theme: Material.Dark
-    Material.accent: theme.accent
+    Material.accent: theme.brandAccent
     Material.roundedScale: theme.radius
 
     ComboBox {
@@ -29,7 +29,7 @@ SectionCard {
             color: "#121214"
             radius: Math.min(4, theme.radius)
             border.width: 1
-            border.color: commandBox.activeFocus ? theme.accent : "#34343b"
+            border.color: commandBox.activeFocus ? theme.brandAccent : "#34343b"
         }
 
         delegate: ItemDelegate {

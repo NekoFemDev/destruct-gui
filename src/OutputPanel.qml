@@ -9,7 +9,7 @@ SectionCard {
     title: qsTr("Output folder")
 
     Material.theme: Material.Dark
-    Material.accent: theme.accent
+    Material.accent: theme.brandAccent
     Material.roundedScale: theme.radius
 
     RowLayout {
@@ -37,7 +37,7 @@ SectionCard {
                 color: "#121214"
                 radius: Math.min(4, theme.radius)
                 border.width: 1
-                border.color: outputField.activeFocus ? theme.accent : "#2e2e34"
+                border.color: outputField.activeFocus ? theme.brandAccent : "#2e2e34"
             }
 
             Text {

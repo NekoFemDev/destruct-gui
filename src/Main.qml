@@ -15,11 +15,11 @@ ApplicationWindow {
     color: "#0e0e10"
 
     Material.theme: Material.Dark
-    Material.accent: theme.accent
+    Material.accent: theme.brandAccent
     Material.roundedScale: theme.radius
 
-    readonly property string accent: theme.accent
-    readonly property string accentFg: theme.accentForeground
+    readonly property string accent: theme.brandAccent
+    readonly property string accentFg: theme.brandAccentForeground
     readonly property bool rtl: Qt.application.layoutDirection === Qt.RightToLeft
     readonly property bool overlayOpen: helpVisible || quitConfirmVisible || setupVisible
     readonly property bool textEditing: activeFocusItem instanceof TextInput
@@ -210,19 +210,14 @@ ApplicationWindow {
                     anchors { leftMargin: 18; rightMargin: 14 }
                     spacing: 10
 
-                    Rectangle {
-                        width: 30
-                        height: 30
-                        radius: Math.min(6, theme.radius)
-                        color: theme.accent
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: "D"
-                            color: theme.accentForeground
-                            font.pixelSize: 17
-                            font.bold: true
-                        }
+                    Image {
+                        width: 34
+                        height: 34
+                        source: "qrc:/destruct-gui.svg"
+                        sourceSize.width: 102
+                        sourceSize.height: 102
+                        smooth: true
+                        fillMode: Image.PreserveAspectFit
                     }
 
                     ColumnLayout {
@@ -251,7 +246,7 @@ ApplicationWindow {
                         radius: Math.min(4, theme.radius)
                         color: binaryHover.hovered ? "#202025" : "#17171a"
                         border.width: 1
-                        border.color: backend.binaryReady ? "#2c3a2e" : "#3d2f22"
+                        border.color: backend.binaryReady ? "#4a4320" : "#3d2f22"
 
                         RowLayout {
                             id: binaryRow
@@ -263,7 +258,7 @@ ApplicationWindow {
                                 height: 6
                                 radius: 3
                                 color: backend.binaryProbing ? "#b08a4d"
-                                     : backend.binaryReady ? "#7bd88f" : "#e5a15c"
+                                     : backend.binaryReady ? theme.brandAccent : "#e5a15c"
                             }
 
                             Text {
@@ -274,7 +269,7 @@ ApplicationWindow {
                                            ? "destruct " + backend.binaryVersion
                                            : qsTr("destruct ready"))
                                         : qsTr("Set up destruct")
-                                color: backend.binaryReady ? "#a9c5ad" : "#d8b080"
+                                color: backend.binaryReady ? "#cbbb63" : "#d8b080"
                                 font.pixelSize: 10
                                 font.family: "monospace"
                             }
@@ -474,7 +469,7 @@ ApplicationWindow {
                             y: 0
                             height: 2
                             width: rightPanel.width * 0.35
-                            color: theme.accent
+                            color: theme.brandAccent
                             radius: 1
 
                             SequentialAnimation on x {
@@ -594,8 +589,8 @@ ApplicationWindow {
                         width: 6
                         height: 6
                         radius: 3
-                        color: backend.state === 1 ? theme.accent
-                             : backend.state === 2 ? "#7bd88f"
+                        color: backend.state === 1 ? theme.brandAccent
+                             : backend.state === 2 ? theme.brandAccent
                              : backend.state === 3 ? "#ff7b72"
                              : backend.state === 4 ? "#e5b567" : "#5d5d66"
                     }
@@ -631,7 +626,7 @@ ApplicationWindow {
                         visible: backend.state === 2
                         text: Format.fileCountLabel(backend.fileCount)
                               + " · " + Format.formatSize(backend.resultBytes, translator.language)
-                        color: "#7f9a84"
+                        color: "#b5a65a"
                         font.pixelSize: 10
                     }
 
@@ -667,7 +662,7 @@ ApplicationWindow {
                 radius: theme.radius
                 color: "transparent"
                 border.width: 2
-                border.color: theme.accent
+                border.color: theme.brandAccent
             }
 
             Column {

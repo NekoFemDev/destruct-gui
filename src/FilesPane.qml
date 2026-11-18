@@ -66,7 +66,7 @@ Item {
                         color: "#121214"
                         radius: Math.min(4, theme.radius)
                         border.width: 1
-                        border.color: filterField.activeFocus ? theme.accent : "#2e2e34"
+                        border.color: filterField.activeFocus ? theme.brandAccent : "#2e2e34"
                     }
 
                     onTextChanged: {
@@ -97,14 +97,14 @@ Item {
                     implicitWidth: 30
                     implicitHeight: 30
                     radius: Math.min(4, theme.radius)
-                    color: root.caseSensitive ? theme.accent : "#1b1b1f"
+                    color: root.caseSensitive ? theme.brandAccent : "#1b1b1f"
                     border.width: 1
-                    border.color: root.caseSensitive ? theme.accent : "#323239"
+                    border.color: root.caseSensitive ? theme.brandAccent : "#323239"
 
                     Text {
                         anchors.centerIn: parent
                         text: "Aa"
-                        color: root.caseSensitive ? theme.accentForeground : "#8f8f98"
+                        color: root.caseSensitive ? theme.brandAccentForeground : "#8f8f98"
                         font.pixelSize: 10
                         font.bold: true
                     }
@@ -199,7 +199,7 @@ Item {
                     Rectangle {
                         width: 2
                         height: parent.height
-                        color: row.previewActive ? theme.accent : "transparent"
+                        color: row.previewActive ? theme.brandAccent : "transparent"
                     }
 
                     RowLayout {
@@ -280,7 +280,7 @@ Item {
                         Text {
                             Layout.fillWidth: true
                             text: model.file + ":" + model.line
-                            color: theme.accent
+                            color: theme.brandAccent
                             font.pixelSize: 10
                             elide: Text.ElideMiddle
                         }

@@ -91,7 +91,7 @@ Item {
                             id: keyLabel
                             anchors.centerIn: parent
                             text: modelData.key
-                            color: theme.accent
+                            color: theme.brandAccent
                             font.pixelSize: 10
                             font.bold: true
                         }

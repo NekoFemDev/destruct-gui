@@ -17,7 +17,7 @@ SectionCard {
         radius: Math.min(6, theme.radius)
         color: hover.hovered || root.dragHover ? "#1d1d20" : "#121214"
         border.width: 1
-        border.color: hover.hovered || root.dragHover ? theme.accent : "#34343b"
+        border.color: hover.hovered || root.dragHover ? theme.brandAccent : "#34343b"
 
         Behavior on border.color { ColorAnimation { duration: 100 } }
 
@@ -69,7 +69,7 @@ SectionCard {
             width: 5
             height: 5
             radius: 3
-            color: theme.accent
+            color: theme.brandAccent
             Layout.alignment: Qt.AlignVCenter
         }
 
@@ -112,7 +112,7 @@ SectionCard {
                 Text {
                     anchors.centerIn: parent
                     text: Format.shortTag(backend.formatKind, backend.inputName)
-                    color: theme.accent
+                    color: theme.brandAccent
                     font.pixelSize: 10
                     font.bold: true
                     font.letterSpacing: 0.5

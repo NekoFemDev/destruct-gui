@@ -29,8 +29,8 @@ Item {
     function logColor(kind) {
         return kind === 1 ? "#ff8a80"
              : kind === 2 ? "#e5b567"
-             : kind === 3 ? theme.accent
-             : kind === 4 ? "#8fd18f" : "#b9b9c2"
+             : kind === 3 ? theme.brandAccent
+             : kind === 4 ? "#c9b95a" : "#b9b9c2"
     }
 
     Rectangle {

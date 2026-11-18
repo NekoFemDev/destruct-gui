@@ -136,8 +136,8 @@ Item {
                     font.family: "monospace"
                     font.pixelSize: 11
                     color: "#cfcfd6"
-                    selectionColor: theme.accent
-                    selectedTextColor: theme.accentForeground
+                    selectionColor: theme.brandAccent
+                    selectedTextColor: theme.brandAccentForeground
                     leftPadding: 14
                     rightPadding: 14
                     topPadding: 12
@@ -209,7 +209,7 @@ Item {
                             radius: 7
                             color: "transparent"
                             border.width: 2
-                            border.color: theme.accent
+                            border.color: theme.brandAccent
                         }
 
                         Rectangle {
@@ -217,7 +217,7 @@ Item {
                             y: 13
                             width: 2
                             height: 8
-                            color: theme.accent
+                            color: theme.brandAccent
                             rotation: -45
                             transformOrigin: Item.TopLeft
                         }

@@ -687,6 +687,8 @@ private slots:
         Theme theme(dir.path());
         QCOMPARE(theme.accent(), QString("#FFD60A"));
         QCOMPARE(theme.accentForeground(), QString("black"));
+        QCOMPARE(theme.brandAccent(), QString("#FFD60A"));
+        QCOMPARE(theme.brandAccentForeground(), QString("black"));
     }
 
     void themeReadsAccent()

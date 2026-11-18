@@ -17,7 +17,7 @@ Rectangle {
         if (!enabled)
             return "#202024"
         if (primary)
-            return hover.hovered ? Qt.lighter(theme.accent, 1.08) : theme.accent
+            return hover.hovered ? Qt.lighter(theme.brandAccent, 1.08) : theme.brandAccent
         if (danger)
             return hover.hovered ? "#3a2023" : "#211619"
         return hover.hovered ? "#24242a" : "#19191d"
@@ -34,7 +34,7 @@ Rectangle {
 
         Text {
             text: root.text
-            color: root.primary ? theme.accentForeground
+            color: root.primary ? theme.brandAccentForeground
                                 : root.danger ? "#ff8a80" : "#e7e7eb"
             font.pixelSize: 13
             font.bold: true
@@ -51,7 +51,7 @@ Rectangle {
                 id: hintLabel
                 anchors.centerIn: parent
                 text: root.hint
-                color: root.primary ? theme.accentForeground : "#9d9da5"
+                color: root.primary ? theme.brandAccentForeground : "#9d9da5"
                 font.pixelSize: 10
                 opacity: 0.85
             }
