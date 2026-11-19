@@ -106,7 +106,9 @@ The release page carries a `destruct-gui-*-windows-x86_64.zip` built with
 Qt 6 and MSVC. It is the GUI only: it uses the native Windows file dialogs and
 expects an existing `destruct.exe` on `PATH` or chosen in the setup dialog.
 The automatic download/build stays Linux-only. The Windows package includes
-the Qt runtime and the app icon; no Qt installation is required.
+the Qt runtime and the app icon; no Qt installation is required. It also
+contains `vc_redist.x64.exe`, which only needs to be run if Windows reports a
+missing MSVC runtime.
 
 Source builds on Windows use Qt 6 with the `win64_msvc2022_64` kit, `qmake`,
 and `nmake`; the project adds `QT += widgets` only on Windows for
