@@ -1,0 +1,60 @@
+name: Windows build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  windows:
+    name: Qt 6 / MSVC x86_64
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.8.3'
+          arch: 'win64_msvc2022_64'
+          cache: true
+
+      - name: Set up MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Build
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force build | Out-Null
+          Push-Location build
+          qmake ..\destruct-gui.pro CONFIG+=release
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          nmake
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Pop-Location
+
+      - name: Package
+        shell: pwsh
+        run: |
+          $exe = Get-ChildItem -Path build -Recurse -Filter destruct-gui.exe |
+                 Select-Object -First 1
+          if (-not $exe) { throw "destruct-gui.exe was not produced" }
+
+          New-Item -ItemType Directory -Force dist | Out-Null
+          Copy-Item $exe.FullName dist\destruct-gui.exe
+          windeployqt --release --compiler-runtime --qmldir src `
+            --no-translations --no-system-d3d-compiler --no-opengl-sw `
+            dist\destruct-gui.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+          Copy-Item README.md, LICENSE dist
+          Compress-Archive -Path dist\* `
+            -DestinationPath destruct-gui-windows-x86_64.zip -Force
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: destruct-gui-windows-x86_64
+          path: destruct-gui-windows-x86_64.zip

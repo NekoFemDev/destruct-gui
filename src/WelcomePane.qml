@@ -27,7 +27,7 @@ Item {
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: 64
                 height: 64
-                source: "qrc:/destruct-gui.svg"
+                source: "qrc:/destruct-gui.png"
                 sourceSize.width: 160
                 sourceSize.height: 160
                 smooth: true
@@ -50,7 +50,7 @@ Item {
                 Text {
                     width: parent.width
                     horizontalAlignment: Text.AlignHCenter
-                    text: qsTr("One window for JVM, Android, Hermes, Flutter, native ELF and PE, Unity IL2CPP, and JavaScript.")
+                    text: qsTr("One window for JVM, Android, Hermes, Flutter, native ELF, Unity IL2CPP, and JavaScript.")
                     color: "#8b8b95"
                     font.pixelSize: 12
                     wrapMode: Text.Wrap
@@ -63,7 +63,7 @@ Item {
                 layoutDirection: Qt.LeftToRight
 
                 Repeater {
-                    model: ["JVM", "DEX / APK", "Hermes", "Flutter", "ELF", "PE", "IL2CPP", "JavaScript"]
+                    model: ["JVM", "DEX / APK", "Hermes", "Flutter", "ELF", "IL2CPP", "JavaScript"]
 
                     Rectangle {
                         width: chip.implicitWidth + 18

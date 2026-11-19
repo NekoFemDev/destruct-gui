@@ -15,6 +15,7 @@ class DestructSetup : public QObject {
     Q_PROPERTY(bool running READ running NOTIFY stateChanged)
     Q_PROPERTY(bool cancelling READ cancelling NOTIFY stateChanged)
     Q_PROPERTY(bool succeeded READ succeeded NOTIFY stateChanged)
+    Q_PROPERTY(bool buildSupported READ buildSupported CONSTANT)
     Q_PROPERTY(QString status READ status NOTIFY statusChanged)
     Q_PROPERTY(QString error READ error NOTIFY stateChanged)
     Q_PROPERTY(QString sourceDirectory READ sourceDirectory CONSTANT)
@@ -29,6 +30,7 @@ public:
     bool running() const { return m_running; }
     bool cancelling() const { return m_cancelling; }
     bool succeeded() const { return m_succeeded; }
+    bool buildSupported() const;
     QString status() const { return m_status; }
     QString error() const { return m_error; }
     QString sourceDirectory() const { return m_sourceDir; }

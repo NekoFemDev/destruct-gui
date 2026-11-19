@@ -4,7 +4,7 @@
 #include "filelistmodel.h"
 #include "filepicker.h"
 #include "logmodel.h"
-#include "portalfilepicker.h"
+#include "platformfilepicker.h"
 #include "searchmodel.h"
 
 #include <QClipboard>
@@ -42,11 +42,20 @@ QString absolutePath(const QString &path)
         return {};
     return QDir::cleanPath(QFileInfo(expanded).absoluteFilePath());
 }
+
+bool isRunnableBinary(const QFileInfo &info)
+{
+#ifdef Q_OS_WIN
+    return info.isFile() && info.suffix().compare(QStringLiteral("exe"), Qt::CaseInsensitive) == 0;
+#else
+    return info.isFile() && info.isExecutable();
+#endif
+}
 } // namespace
 
 Backend::Backend(FilePicker *filePicker, QObject *parent)
     : QObject(parent),
-      m_picker(filePicker ? filePicker : new PortalFilePicker(this)),
+      m_picker(filePicker ? filePicker : createPlatformFilePicker(this)),
       m_setup(new DestructSetup({}, this)),
       m_files(new FileListModel(this)),
       m_logModel(new LogModel(this)),
@@ -251,15 +260,14 @@ QStringList Backend::arguments() const
     options.metadata = m_metadataPath;
     options.output = m_outputPath;
     options.offsets = m_offsetsPath;
+    options.il2cppMetadata = m_elfMetadataPath;
     options.decompile = m_decompile;
     options.splitFunctions = m_splitFunctions;
     options.crossReferences = m_crossReferences;
     options.simplifyCfg = m_simplifyCfg;
     options.emitLLVM = m_emitLLVM;
     options.regsAsVars = m_regsAsVars;
-    options.noEnhance = m_noEnhance;
     options.noLocationComments = m_noLocationComments;
-    options.deobfuscate = m_deobfuscate;
     options.verbose = m_verbose;
     options.project = true;
     return formats::arguments(options);
@@ -273,15 +281,14 @@ QString Backend::commandLine() const
     options.metadata = m_metadataPath;
     options.output = m_outputPath;
     options.offsets = m_offsetsPath;
+    options.il2cppMetadata = m_elfMetadataPath;
     options.decompile = m_decompile;
     options.splitFunctions = m_splitFunctions;
     options.crossReferences = m_crossReferences;
     options.simplifyCfg = m_simplifyCfg;
     options.emitLLVM = m_emitLLVM;
     options.regsAsVars = m_regsAsVars;
-    options.noEnhance = m_noEnhance;
     options.noLocationComments = m_noLocationComments;
-    options.deobfuscate = m_deobfuscate;
     options.verbose = m_verbose;
     options.project = true;
     return formats::commandLine(options);
@@ -311,6 +318,9 @@ void Backend::handlePickedPath(int mode, const QString &path)
     case FilePicker::Metadata:
         setMetadataPath(path);
         return;
+    case FilePicker::ElfMetadata:
+        setElfMetadataPath(path);
+        return;
     case FilePicker::OutputDirectory:
         setOutputPath(path);
         return;
@@ -333,6 +343,12 @@ void Backend::chooseMetadata()
 {
     m_picker->choose(FilePicker::Metadata,
                      m_metadataPath.isEmpty() ? QUrl() : QUrl::fromLocalFile(m_metadataPath));
+}
+
+void Backend::chooseElfMetadata()
+{
+    m_picker->choose(FilePicker::ElfMetadata,
+                     m_elfMetadataPath.isEmpty() ? QUrl() : QUrl::fromLocalFile(m_elfMetadataPath));
 }
 
 void Backend::chooseOutput()
@@ -392,8 +408,22 @@ void Backend::setInputPath(const QString &path)
     m_info = info;
     m_inputSize = QFileInfo(absolute).size();
 
-    if (changed)
+    if (changed) {
         applyDefaultOutput();
+        QString autoMetadata;
+        if (info.kind == formats::Kind::Elf
+            && QFileInfo(absolute).fileName().compare(QStringLiteral("libil2cpp.so"),
+                                                      Qt::CaseInsensitive) == 0) {
+            const QString sibling = QFileInfo(absolute).absoluteDir().filePath(
+                QStringLiteral("global-metadata.dat"));
+            if (QFileInfo(sibling).isFile())
+                autoMetadata = sibling;
+        }
+        if (m_elfMetadataPath != autoMetadata) {
+            m_elfMetadataPath = autoMetadata;
+            emit elfMetadataChanged();
+        }
+    }
 
     updateAvailableCommands();
     pickCommandForInput();
@@ -444,6 +474,18 @@ void Backend::setMetadataPath(const QString &path)
     }
 }
 
+void Backend::setElfMetadataPath(const QString &path)
+{
+    if (running())
+        return;
+    const QString absolute = path.trimmed().isEmpty() ? QString() : absolutePath(path);
+    if (absolute == m_elfMetadataPath)
+        return;
+    m_elfMetadataPath = absolute;
+    emit elfMetadataChanged();
+    refreshValidation();
+}
+
 void Backend::setOutputPath(const QString &path)
 {
     if (running() || path.trimmed().isEmpty())
@@ -487,20 +529,28 @@ void Backend::discoverBinary()
         candidates << configured;
     // Deliberately no developer-specific checkout paths: the system
     // location comes first, then whatever the user's PATH already resolves.
+#ifdef Q_OS_WIN
+    const QString binaryName = QStringLiteral("destruct.exe");
+    const QString onPath = QStandardPaths::findExecutable(binaryName);
+#else
+    const QString binaryName = QStringLiteral("destruct");
     candidates << QStringLiteral("/usr/bin/destruct");
-    const QString onPath = QStandardPaths::findExecutable(QStringLiteral("destruct"));
+    const QString onPath = QStandardPaths::findExecutable(binaryName);
+#endif
     if (!onPath.isEmpty())
         candidates << onPath;
+#ifndef Q_OS_WIN
     candidates << QStringLiteral("/usr/local/bin/destruct");
+#endif
     // A copy built by the setup dialog lives under the app's data folder.
     // Finding it here makes that build survive lost settings and later runs.
     candidates << QDir(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation))
-                      .filePath(QStringLiteral("DeStruct/destruct"));
+                      .filePath(QStringLiteral("DeStruct/") + binaryName);
     candidates.removeDuplicates();
 
     for (const QString &candidate : candidates) {
         const QFileInfo info(expandHome(candidate));
-        if (info.isFile() && info.isExecutable()) {
+        if (isRunnableBinary(info)) {
             m_binaryPath = info.absoluteFilePath();
             break;
         }
@@ -518,7 +568,7 @@ void Backend::setBinaryPath(const QString &path)
     if (absolute.isEmpty())
         return;
     const QFileInfo info(absolute);
-    if (!info.isFile() || !info.isExecutable()) {
+    if (!isRunnableBinary(info)) {
         showNotice(tr("That file is not executable. Choose the destruct binary itself."));
         return;
     }
@@ -536,7 +586,7 @@ void Backend::probeBinary()
         m_probe.waitForFinished(500);
     }
     const QFileInfo info(m_binaryPath);
-    if (m_binaryPath.isEmpty() || !info.isFile() || !info.isExecutable()) {
+    if (m_binaryPath.isEmpty() || !isRunnableBinary(info)) {
         m_binaryProbing = false;
         m_binaryReady = false;
         m_binaryVersion.clear();
@@ -577,10 +627,12 @@ QStringList Backend::commandsFor(const formats::Info &info)
     case formats::Kind::Elf:
         if (info.flutterLibrary)
             return {QStringLiteral("flutter"), QStringLiteral("elf"),
-                    QStringLiteral("il2cpp")};
-        return {QStringLiteral("elf"), QStringLiteral("il2cpp")};
+                    QStringLiteral("elf-info"), QStringLiteral("il2cpp")};
+        return {QStringLiteral("elf"), QStringLiteral("elf-info"),
+                QStringLiteral("il2cpp")};
     case formats::Kind::Pe:
-        return {QStringLiteral("pe")};
+        // PE support was removed from DeStruct beta.4.
+        return {};
     case formats::Kind::Metadata:
         return {QStringLiteral("il2cpp")};
     case formats::Kind::Unknown:
@@ -623,9 +675,7 @@ void Backend::resetOptions()
     m_simplifyCfg = false;
     m_emitLLVM = false;
     m_regsAsVars = false;
-    m_noEnhance = false;
     m_noLocationComments = false;
-    m_deobfuscate = false;
     emit optionsChanged();
 }
 
@@ -728,17 +778,6 @@ void Backend::setRegsAsVars(bool value)
     refreshValidation();
 }
 
-void Backend::setNoEnhance(bool value)
-{
-    if (value && m_command != QStringLiteral("elf"))
-        return;
-    if (value == m_noEnhance)
-        return;
-    m_noEnhance = value;
-    emit optionsChanged();
-    refreshValidation();
-}
-
 void Backend::setNoLocationComments(bool value)
 {
     if (value && m_command != QStringLiteral("elf"))
@@ -746,21 +785,6 @@ void Backend::setNoLocationComments(bool value)
     if (value == m_noLocationComments)
         return;
     m_noLocationComments = value;
-    emit optionsChanged();
-    refreshValidation();
-}
-
-void Backend::setDeobfuscate(bool value)
-{
-    if (value
-        && m_command != QStringLiteral("jvm")
-        && m_command != QStringLiteral("dex")
-        && m_command != QStringLiteral("flutter")
-        && m_command != QStringLiteral("pe"))
-        return;
-    if (value == m_deobfuscate)
-        return;
-    m_deobfuscate = value;
     emit optionsChanged();
     refreshValidation();
 }
@@ -789,7 +813,8 @@ void Backend::refreshValidation()
             code = QStringLiteral("badSignature");
             detail = formatKind();
         } else if (m_command.isEmpty()) {
-            code = QStringLiteral("noCommand");
+            code = m_info.kind == formats::Kind::Pe ? QStringLiteral("peRemoved")
+                                                    : QStringLiteral("noCommand");
         } else if (m_command == QStringLiteral("il2cpp") && m_metadataPath.isEmpty()) {
             code = QStringLiteral("missingMetadata");
         } else if (m_command == QStringLiteral("il2cpp")
@@ -805,12 +830,17 @@ void Backend::refreshValidation()
             code = QStringLiteral("notAarch64");
             detail = m_info.architecture;
         } else if (m_command == QStringLiteral("elf") && m_decompile
+                   && !m_elfMetadataPath.isEmpty()
+                   && !QFileInfo(m_elfMetadataPath).isFile()) {
+            code = QStringLiteral("elfMetadataMissing");
+            detail = m_elfMetadataPath;
+        } else if (m_command == QStringLiteral("elf") && m_decompile
                    && !m_offsetsPath.isEmpty() && !QFileInfo::exists(m_offsetsPath)) {
             code = QStringLiteral("offsetsMissing");
             detail = m_offsetsPath;
-        } else if (m_outputPath.isEmpty()) {
+        } else if (m_command != QStringLiteral("elf-info") && m_outputPath.isEmpty()) {
             code = QStringLiteral("outputMissing");
-        } else if (!outputWritable()) {
+        } else if (m_command != QStringLiteral("elf-info") && !outputWritable()) {
             code = QFileInfo(m_outputPath).isFile() ? QStringLiteral("outputIsFile")
                                                     : QStringLiteral("outputNotWritable");
             detail = m_outputPath;
@@ -866,7 +896,7 @@ void Backend::run()
     m_logModel->clear();
     resetResults();
 
-    if (!QDir().mkpath(m_outputPath)) {
+    if (m_command != QStringLiteral("elf-info") && !QDir().mkpath(m_outputPath)) {
         m_errorText = tr("Could not create the output folder: %1").arg(m_outputPath);
         appendLog(QStringLiteral("Error: ") + m_errorText);
         m_state = Failed;
@@ -1029,6 +1059,13 @@ void Backend::resetResults()
 
 void Backend::scanResults()
 {
+    if (m_command == QStringLiteral("elf-info")) {
+        m_files->clear();
+        m_primaryRelativePath.clear();
+        m_collectionResult = false;
+        emit resultsChanged();
+        return;
+    }
     m_files->scan(m_outputPath);
     m_primaryRelativePath = findPrimaryArtifact();
     m_collectionResult = m_command == QStringLiteral("jvm")
@@ -1047,8 +1084,7 @@ QString Backend::findPrimaryArtifact() const
         if (m_splitFunctions)
             suffixes << QStringLiteral("c");
         else
-            suffixes << QStringLiteral("decompiled.c.enhanced")
-                     << QStringLiteral("decompiled.c");
+            suffixes << QStringLiteral("decompiled.c");
     } else if (m_command == QStringLiteral("hermes")) {
         suffixes << QStringLiteral("hasm");
     } else if (m_command == QStringLiteral("flutter")) {

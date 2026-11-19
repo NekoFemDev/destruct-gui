@@ -93,7 +93,9 @@ Item {
             Text {
                 Layout.fillWidth: true
                 visible: root.ask
-                text: qsTr("destruct is the command-line decompiler this window drives. It was not found in /usr/bin or on your PATH.\n\nDownload the source from GitHub and build it here, or choose an existing destruct binary.")
+                text: root.installer.buildSupported
+                      ? qsTr("destruct is the command-line decompiler this window drives. It was not found in /usr/bin or on your PATH.\n\nDownload the source from GitHub and build it here, or choose an existing destruct binary.")
+                      : qsTr("destruct is the command-line decompiler this window drives. It was not found on your PATH.\n\nAutomatic download and build is available on Linux only. Choose an existing destruct.exe.")
                 color: "#a7a7b0"
                 font.pixelSize: 12
                 wrapMode: Text.Wrap
@@ -102,7 +104,7 @@ Item {
 
             Rectangle {
                 Layout.fillWidth: true
-                visible: root.ask
+                visible: root.ask && root.installer.buildSupported
                 implicitHeight: destination.implicitHeight + 20
                 color: "#121214"
                 radius: Math.min(4, theme.radius)
@@ -127,7 +129,7 @@ Item {
 
             Text {
                 Layout.fillWidth: true
-                visible: root.ask
+                visible: root.ask && root.installer.buildSupported
                 text: qsTr("Needs curl, tar, make, Go, and a C compiler. The first build also downloads Capstone, so it can take a few minutes. The source and binary stay in this folder; Go uses its usual caches.")
                 color: "#777780"
                 font.pixelSize: 10
@@ -141,14 +143,16 @@ Item {
 
                 ActionButton {
                     Layout.fillWidth: true
+                    visible: root.installer.buildSupported
                     text: qsTr("Download and build")
                     onClicked: root.installer.install()
                 }
 
                 ActionButton {
                     implicitWidth: 168
+                    Layout.fillWidth: !root.installer.buildSupported
                     text: qsTr("Choose binary...")
-                    primary: false
+                    primary: !root.installer.buildSupported
                     onClicked: backend.chooseBinary()
                 }
 

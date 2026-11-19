@@ -201,15 +201,6 @@ SectionCard {
 
         OptionToggle {
             Layout.fillWidth: true
-            label: qsTr("Minimal comments")
-            description: qsTr("Skip the enhanced comments on lifted expressions.")
-            active: backend.noEnhance
-            available: !backend.running
-            onToggled: backend.noEnhance = !backend.active
-        }
-
-        OptionToggle {
-            Layout.fillWidth: true
             label: qsTr("No location comments")
             description: qsTr("Leave out the address of each lifted function.")
             active: backend.noLocationComments
@@ -271,6 +262,61 @@ SectionCard {
                 onClicked: backend.chooseOffsets()
             }
         }
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 6
+
+            Text {
+                text: qsTr("Managed metadata")
+                color: "#c9c9d1"
+                font.pixelSize: 11
+            }
+
+            Item { Layout.fillWidth: true }
+
+            TextButton {
+                visible: backend.elfMetadataPath !== ""
+                text: qsTr("Clear")
+                onClicked: backend.setElfMetadataPath("")
+            }
+
+            TextButton {
+                text: qsTr("Choose")
+                onClicked: backend.chooseElfMetadata()
+            }
+        }
+
+        Rectangle {
+            Layout.fillWidth: true
+            implicitHeight: 30
+            color: "#121214"
+            radius: Math.min(4, theme.radius)
+            border.width: 1
+            border.color: "#2e2e34"
+
+            Text {
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                    verticalCenter: parent.verticalCenter
+                    leftMargin: 9
+                    rightMargin: 9
+                }
+                text: backend.elfMetadataPath !== ""
+                      ? backend.elfMetadataPath
+                      : qsTr("Optional; auto-detected next to libil2cpp.so")
+                color: backend.elfMetadataPath !== "" ? "#b9b9c2" : "#66666f"
+                font.pixelSize: 11
+                elide: Text.ElideMiddle
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: backend.chooseElfMetadata()
+            }
+        }
     }
 
     // ------------------------------------------------------------------
@@ -278,16 +324,7 @@ SectionCard {
     // ------------------------------------------------------------------
     OptionToggle {
         Layout.fillWidth: true
-        visible: ["jvm", "dex", "flutter", "pe"].indexOf(backend.command) >= 0
-        label: qsTr("Deobfuscate")
-        description: qsTr("Clean up naming and fold obvious obfuscation.")
-        active: backend.deobfuscate
-        available: !backend.running
-        onToggled: backend.deobfuscate = !backend.active
-    }
-
-    OptionToggle {
-        Layout.fillWidth: true
+        visible: backend.command !== "elf-info"
         label: qsTr("Verbose log")
         description: qsTr("Print progress for every class or function.")
         active: backend.verbose

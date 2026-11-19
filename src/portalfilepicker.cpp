@@ -148,6 +148,7 @@ void PortalFilePicker::choose(Mode mode, const QUrl &suggested)
                 options, mode);
         return;
     case Metadata:
+    case ElfMetadata:
         options.insert(QStringLiteral("accept_label"),
                        QCoreApplication::translate("PortalFilePicker", "Open"));
         options.insert(QStringLiteral("multiple"), false);

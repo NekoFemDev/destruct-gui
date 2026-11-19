@@ -243,6 +243,15 @@ QString defaultOutputPath(const QString &inputPath)
 
 QStringList arguments(const JobOptions &options)
 {
+    // `elf info` is a read-only triage command: it takes exactly the input
+    // path, writes nothing, and rejects the output/flags the other actions use.
+    if (options.command == QStringLiteral("elf-info")) {
+        QStringList infoArgs{QStringLiteral("elf"), QStringLiteral("info")};
+        if (!options.input.isEmpty())
+            infoArgs << options.input;
+        return infoArgs;
+    }
+
     QStringList args;
     args << options.command;
     if (options.command == QStringLiteral("il2cpp")) {
@@ -275,20 +284,12 @@ QStringList arguments(const JobOptions &options)
             args << QStringLiteral("--emit-llvm");
         if (options.regsAsVars)
             args << QStringLiteral("--regs-as-vars");
-        if (options.noEnhance)
-            args << QStringLiteral("--no-enhance");
         if (options.noLocationComments)
             args << QStringLiteral("--no-location-comments");
         if (!options.offsets.isEmpty())
             args << QStringLiteral("--il2cpp-offsets") << options.offsets;
-    }
-
-    if (options.deobfuscate
-        && (options.command == QStringLiteral("jvm")
-            || options.command == QStringLiteral("dex")
-            || options.command == QStringLiteral("flutter")
-            || options.command == QStringLiteral("pe"))) {
-        args << QStringLiteral("--deobfuscate");
+        if (!options.il2cppMetadata.isEmpty())
+            args << QStringLiteral("--il2cpp-metadata") << options.il2cppMetadata;
     }
     if (!options.project
         && (options.command == QStringLiteral("jvm")

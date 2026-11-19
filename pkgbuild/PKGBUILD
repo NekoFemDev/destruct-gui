@@ -1,11 +1,11 @@
 # The GUI's name, icon, and launcher entry are all "destruct-gui".
 pkgname=destruct-gui
-pkgver=0.1.0
+pkgver=0.2.0
 pkgrel=1
 pkgdesc='Keyboard-first desktop GUI for the DeStruct multi-format decompiler'
 arch=('x86_64' 'aarch64')
 license=('MIT')
-depends=('qt6-base' 'qt6-declarative' 'qt6-wayland' 'qt6-svg' 'xdg-desktop-portal')
+depends=('qt6-base' 'qt6-declarative' 'qt6-wayland' 'xdg-desktop-portal')
 makedepends=('gcc' 'make' 'qt6-base' 'qt6-declarative')
 options=('!debug')
 source=()

@@ -274,17 +274,15 @@ private slots:
         options.command = QStringLiteral("jvm");
         options.input = QStringLiteral("/tmp/a b.jar");
         options.output = QStringLiteral("/tmp/out");
-        options.deobfuscate = true;
         options.verbose = true;
 
         const QStringList args = formats::arguments(options);
         QCOMPARE(args, QStringList({QStringLiteral("jvm"),
                                     QStringLiteral("/tmp/a b.jar"),
                                     QStringLiteral("-o"), QStringLiteral("/tmp/out"),
-                                    QStringLiteral("--deobfuscate"),
                                     QStringLiteral("-v")}));
         QCOMPARE(formats::commandLine(options),
-                 QStringLiteral("destruct jvm '/tmp/a b.jar' -o /tmp/out --deobfuscate -v"));
+                 QStringLiteral("destruct jvm '/tmp/a b.jar' -o /tmp/out -v"));
     }
 
     void buildsElfDecompilerArguments()
@@ -299,9 +297,9 @@ private slots:
         options.simplifyCfg = true;
         options.emitLLVM = true;
         options.regsAsVars = true;
-        options.noEnhance = true;
         options.noLocationComments = true;
         options.offsets = QStringLiteral("game_dump");
+        options.il2cppMetadata = QStringLiteral("global-metadata.dat");
 
         const QStringList args = formats::arguments(options);
         QCOMPARE(args, QStringList({
@@ -310,8 +308,9 @@ private slots:
             QStringLiteral("--decompile"), QStringLiteral("--split-functions"),
             QStringLiteral("--cross-references"), QStringLiteral("--simplify-cfg"),
             QStringLiteral("--emit-llvm"), QStringLiteral("--regs-as-vars"),
-            QStringLiteral("--no-enhance"), QStringLiteral("--no-location-comments"),
+            QStringLiteral("--no-location-comments"),
             QStringLiteral("--il2cpp-offsets"), QStringLiteral("game_dump"),
+            QStringLiteral("--il2cpp-metadata"), QStringLiteral("global-metadata.dat"),
         }));
     }
 
@@ -331,6 +330,20 @@ private slots:
         QVERIFY(!args.contains(QStringLiteral("--split-functions")));
         QVERIFY(!args.contains(QStringLiteral("--emit-llvm")));
         QVERIFY(!args.contains(QStringLiteral("--il2cpp-offsets")));
+    }
+
+    void buildsElfInfoArguments()
+    {
+        formats::JobOptions options;
+        options.command = QStringLiteral("elf-info");
+        options.input = QStringLiteral("libnative.so");
+        options.output = QStringLiteral("ignored");
+        options.verbose = true;
+        options.decompile = true;
+
+        QCOMPARE(formats::arguments(options), QStringList({
+            QStringLiteral("elf"), QStringLiteral("info"), QStringLiteral("libnative.so")
+        }));
     }
 
     void buildsIl2cppArgumentsInLibraryOrder()
@@ -388,6 +401,42 @@ private slots:
         QCOMPARE(backend.availableCommands(), QStringList{QStringLiteral("jvm")});
         QCOMPARE(backend.formatKind(), QStringLiteral("jvm"));
         QCOMPARE(backend.outputPath(), QDir(dir.path()).filePath("app_destruct"));
+    }
+
+    void elfOffersInfoAndMetadata()
+    {
+        FakePicker picker;
+        Backend backend(&picker);
+        QTemporaryDir dir;
+        writeFile(dir.filePath("lib.so"), elfAarch64Header());
+        writeFile(dir.filePath("global-metadata.dat"), QByteArray::fromHex("af1bb1fa01000000"));
+
+        backend.setInputPath(dir.filePath("lib.so"));
+        QVERIFY(backend.availableCommands().contains(QStringLiteral("elf-info")));
+        QCOMPARE(backend.outputUsed(), true);
+
+        backend.setCommand(QStringLiteral("elf-info"));
+        QCOMPARE(backend.outputUsed(), false);
+        QCOMPARE(backend.arguments(), QStringList({
+            QStringLiteral("elf"), QStringLiteral("info"), dir.filePath("lib.so")
+        }));
+
+        backend.setCommand(QStringLiteral("elf"));
+        backend.setElfMetadataPath(dir.filePath("global-metadata.dat"));
+        QVERIFY(backend.arguments().contains(QStringLiteral("--il2cpp-metadata")));
+        QVERIFY(backend.arguments().contains(dir.filePath("global-metadata.dat")));
+    }
+
+    void peHasNoActionAfterBeta4()
+    {
+        FakePicker picker;
+        Backend backend(&picker);
+        QTemporaryDir dir;
+        writeFile(dir.filePath("program.exe"), peHeader(0x8664));
+
+        backend.setInputPath(dir.filePath("program.exe"));
+        QVERIFY(backend.availableCommands().isEmpty());
+        QCOMPARE(backend.validationCode(), QStringLiteral("peRemoved"));
     }
 
     void libappPrefersFlutterAndOffersElf()

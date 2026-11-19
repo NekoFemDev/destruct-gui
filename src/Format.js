@@ -7,8 +7,8 @@ function commandLabel(id, decompile) {
     case "hermes": return qsTr("Hermes · assembly")
     case "flutter": return qsTr("Flutter · Dart assembly")
     case "elf": return decompile ? qsTr("ELF · C decompilation") : qsTr("ELF · disassembly")
+    case "elf-info": return qsTr("ELF · info")
     case "il2cpp": return qsTr("IL2CPP · dump.cs")
-    case "pe": return qsTr("PE · disassembly")
     case "js": return qsTr("JavaScript · deobfuscate")
     }
     return qsTr("Choose an action")
@@ -23,8 +23,8 @@ function commandHint(id, decompile) {
     case "elf": return decompile
         ? qsTr("Recovers functions, control flow, and struct access as readable pseudo-C.")
         : qsTr("Disassembles native code. Turn on decompilation for readable pseudo-C.")
+    case "elf-info": return qsTr("Prints headers, sections, symbols, dependencies, and hardening flags without decompiling.")
     case "il2cpp": return qsTr("Dumps Unity types, fields, and methods from libil2cpp.so and global-metadata.dat.")
-    case "pe": return qsTr("Disassembles Windows PE executables and DLLs.")
     case "js": return qsTr("Beautifies JavaScript and folds obvious obfuscation into a readable .deobf.js.")
     }
     return ""
@@ -68,8 +68,9 @@ function runLabel(command, decompile) {
         return decompile ? qsTr("Decompile to C") : qsTr("Disassemble")
     case "hermes":
     case "flutter":
-    case "pe":
         return qsTr("Disassemble")
+    case "elf-info":
+        return qsTr("Inspect")
     case "il2cpp":
         return qsTr("Dump")
     case "js":
@@ -97,6 +98,8 @@ function validationMessage(code, detail) {
     case "inputMissing": return qsTr("The input file no longer exists.")
     case "badSignature": return qsTr("This file does not look like a valid %1 file.").arg(detail.toUpperCase())
     case "noCommand": return qsTr("This file type is not supported yet.")
+    case "peRemoved": return qsTr("PE disassembly was removed in DeStruct beta.4. Use a dedicated PE tool.")
+    case "elfMetadataMissing": return qsTr("The managed metadata file no longer exists.")
     case "missingMetadata": return qsTr("IL2CPP needs global-metadata.dat as a second input.")
     case "metadataMissing": return qsTr("global-metadata.dat is missing or not a valid metadata file.")
     case "notAarch64": return qsTr("C decompilation needs an AArch64 binary; this file is %1.").arg(detail)

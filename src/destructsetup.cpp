@@ -66,7 +66,20 @@ DestructSetup::~DestructSetup()
 
 QString DestructSetup::binaryPath() const
 {
+#ifdef Q_OS_WIN
+    return QDir(m_sourceDir).filePath(QStringLiteral("destruct.exe"));
+#else
     return QDir(m_sourceDir).filePath(QStringLiteral("destruct"));
+#endif
+}
+
+bool DestructSetup::buildSupported() const
+{
+#ifdef Q_OS_WIN
+    return false;
+#else
+    return true;
+#endif
 }
 
 QObject *DestructSetup::log() const
@@ -123,6 +136,11 @@ void DestructSetup::install()
 {
     if (m_running)
         return;
+
+#ifdef Q_OS_WIN
+    fail(tr("Automatic setup is available on Linux only. Choose an existing destruct.exe."));
+    return;
+#endif
 
     m_error.clear();
     m_succeeded = false;

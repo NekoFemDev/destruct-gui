@@ -13,6 +13,7 @@ public:
     enum Mode {
         Input,
         Metadata,
+        ElfMetadata,
         OutputDirectory,
         OffsetsDirectory,
         Binary,

@@ -57,15 +57,14 @@ struct JobOptions {
     QString metadata;
     QString output;
     QString offsets;
+    QString il2cppMetadata;
     bool decompile = false;
     bool splitFunctions = false;
     bool crossReferences = false;
     bool simplifyCfg = false;
     bool emitLLVM = false;
     bool regsAsVars = false;
-    bool noEnhance = false;
     bool noLocationComments = false;
-    bool deobfuscate = false;
     bool verbose = false;
     bool project = true;
 };

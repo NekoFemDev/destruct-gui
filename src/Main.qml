@@ -167,7 +167,9 @@ ApplicationWindow {
             if (backend.state === 1) {
                 win.tab = "log"
             } else if (backend.state === 2) {
-                if (backend.primaryRelativePath !== "" && !backend.collectionResult) {
+                if (backend.command === "elf-info") {
+                    win.tab = "log"
+                } else if (backend.primaryRelativePath !== "" && !backend.collectionResult) {
                     backend.openPreview(backend.primaryRelativePath, 0)
                     win.tab = "preview"
                 } else {
@@ -221,7 +223,7 @@ ApplicationWindow {
                         Layout.maximumWidth: 34
                         Layout.maximumHeight: 34
                         Layout.alignment: Qt.AlignVCenter
-                        source: "qrc:/destruct-gui.svg"
+                        source: "qrc:/destruct-gui.png"
                         sourceSize.width: 102
                         sourceSize.height: 102
                         smooth: true
@@ -400,7 +402,8 @@ ApplicationWindow {
                                 OutputPanel {
                                     Layout.fillWidth: true
                                     opacity: backend.running ? 0.62 : 1
-                                    visible: backend.inputPath !== "" || backend.metadataPath !== ""
+                                    visible: backend.outputUsed
+                                             && (backend.inputPath !== "" || backend.metadataPath !== "")
                                     enabled: !backend.running
                                     Behavior on opacity { NumberAnimation { duration: 120 } }
                                 }
@@ -425,8 +428,11 @@ ApplicationWindow {
 
                             Text {
                                 Layout.fillWidth: true
-                                text: Format.validationMessage(backend.validationCode,
-                                                               backend.validationDetail)
+                                text: backend.validationCode === "missingBinary"
+                                      && !backend.setup.buildSupported
+                                      ? qsTr("The destruct CLI was not found. Choose an existing destruct.exe.")
+                                      : Format.validationMessage(backend.validationCode,
+                                                                 backend.validationDetail)
                                 color: "#ff8a80"
                                 font.pixelSize: 10
                                 wrapMode: Text.Wrap
@@ -634,7 +640,7 @@ ApplicationWindow {
                     }
 
                     Text {
-                        visible: backend.state === 2
+                        visible: backend.state === 2 && backend.command !== "elf-info"
                         text: Format.fileCountLabel(backend.fileCount)
                               + " · " + Format.formatSize(backend.resultBytes, translator.language)
                         color: "#b5a65a"
@@ -642,7 +648,7 @@ ApplicationWindow {
                     }
 
                     Text {
-                        visible: backend.outputPath !== ""
+                        visible: backend.outputPath !== "" && backend.outputUsed
                         text: backend.outputPath
                         color: "#5f5f68"
                         font.pixelSize: 10

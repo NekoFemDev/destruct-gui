@@ -13,6 +13,7 @@ HEADERS += \
     ../src/filepicker.h \
     ../src/formats.h \
     ../src/logmodel.h \
+    ../src/platformfilepicker.h \
     ../src/portalfilepicker.h \
     ../src/searchmodel.h \
     ../src/theme.h \
@@ -25,6 +26,7 @@ SOURCES += \
     ../src/filelistmodel.cpp \
     ../src/formats.cpp \
     ../src/logmodel.cpp \
+    ../src/platformfilepicker_unix.cpp \
     ../src/portalfilepicker.cpp \
     ../src/searchmodel.cpp \
     ../src/theme.cpp \

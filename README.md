@@ -3,20 +3,24 @@
 A keyboard-first desktop window for [DeStruct](https://github.com/NekoFemDev/DeStruct):
 pick a file, let the app detect its format, adjust the options that matter,
 and read the result inside the same window instead of bouncing between a
-terminal and a text editor.
+terminal and a text editor. Updated for **DeStruct 1.0.0-beta.4**.
 
 ![DeStruct GUI](screenshot.png)
 
 ## What it does
 
 - **Detects the format from the file** — JVM `.class`/`.jar`, Android
-  `.dex`/`.apk`, Hermes `.hbc`/`.bundle`, Flutter `libapp.so`/APK, ELF
-  `.so`/`.elf`, PE `.exe`/`.dll`, Unity IL2CPP (`global-metadata.dat` +
-  `libil2cpp.so`), and JavaScript.
+  `.dex`/`.apk`, Hermes `.hbc`/`.bundle`, Flutter `libapp.so`/APK, native ELF
+  `.so`/`.elf`, Unity IL2CPP (`global-metadata.dat` + `libil2cpp.so`), and
+  JavaScript.
 - **Shows only the options the command understands** — for AArch64 ELF that
   means decompile to C, split functions, cross-references, CFG simplification,
-  LLVM IR, and IL2CPP field offsets; for JVM/DEX, deobfuscation; for IL2CPP, a
-  second field for `global-metadata.dat`.
+  LLVM IR, IL2CPP field offsets, and optional Unity `global-metadata.dat`
+  names; for JVM/DEX the decompiler needs no switches; for IL2CPP, a second
+  field for `global-metadata.dat`.
+- **Adds the new ELF triage action** — `ELF · info` prints headers, sections,
+  symbols, dependencies, DWARF summary, and hardening flags into the Log tab
+  without writing any files.
 - **Runs `destruct` with a live log** — progress, errors, a real cancel button
   (SIGTERM first, then `kill` after four seconds), elapsed time, and a result
   summary.
@@ -27,9 +31,9 @@ terminal and a text editor.
   Enter. Results are clickable and open the preview at the matching line.
   The scan runs in the background and does not freeze the window.
 - **Keeps its own palette** — the icon's yellow and near-black run through
-  the buttons, tabs, toggles, and status dots. Hyprland's window rounding and
-  Omarchy's language still update live; the interface ships Russian and
-  English catalogs and falls back to English string by string.
+  the buttons, tabs, toggles, and status dots. On Linux, Hyprland's window
+  rounding and Omarchy's language still update live; the interface ships
+  Russian and English catalogs and falls back to English string by string.
 - **Works with mouse and keyboard** — drop a file anywhere in the window,
   `Ctrl+O`, `Space`, `?`, open a file from a file manager
   (`destruct-gui file.apk`), and the last eight successful runs are remembered.
@@ -46,16 +50,20 @@ looks for it in this order:
 5. a local build made by the setup dialog under
    `~/.local/share/destruct/destruct-gui/DeStruct`.
 
-If none is found, the first-run dialog offers two choices:
+If none is found, the first-run dialog offers two choices on Linux:
 
 - **Download and build** — downloads the DeStruct source from GitHub and
   builds `destruct` into `~/.local/share/destruct/destruct-gui/DeStruct`.
   This needs `curl`, `tar`, `make`, Go, and a C compiler. The first build also
   downloads and compiles Capstone, so it can take a few minutes. The source
   and binary stay in that folder; the Go toolchain uses its usual module and
-  build caches. This is the only network action, and it
-  never starts without your click.
+  build caches. This is the only network action, and it never starts without
+  your click.
 - **Choose binary...** — point the GUI at an existing `destruct` binary.
+
+On Windows the dialog only offers **Choose binary...**, because the automatic
+download/build workflow is Linux-only; the GUI expects an existing
+`destruct.exe`.
 
 
 To build the CLI yourself instead:
@@ -71,7 +79,7 @@ somewhere on `PATH`, for example `/usr/bin/destruct`.
 ## Build and install the GUI
 
 Requires Arch Linux/Omarchy with `qt6-base`, `qt6-declarative`, `qt6-wayland`,
-`qt6-svg`, and `xdg-desktop-portal` (all present on Omarchy).
+and `xdg-desktop-portal` (all present on Omarchy).
 
 ```bash
 ./bin/build         # → build/destruct-gui
@@ -91,6 +99,18 @@ launcher (`Super + Space`). It also opens files from a file manager.
 The GUI does not modify the DeStruct repository and does not depend on a
 particular checkout location. Its PKGBUILD does not depend on a `destruct`
 package because the CLI is not packaged in the Omarchy repositories yet.
+
+### Windows
+
+The release page carries a `destruct-gui-*-windows-x86_64.zip` built with
+Qt 6 and MSVC. It is the GUI only: it uses the native Windows file dialogs and
+expects an existing `destruct.exe` on `PATH` or chosen in the setup dialog.
+The automatic download/build stays Linux-only. The Windows package includes
+the Qt runtime and the app icon; no Qt installation is required.
+
+Source builds on Windows use Qt 6 with the `win64_msvc2022_64` kit, `qmake`,
+and `nmake`; the project adds `QT += widgets` only on Windows for
+`QFileDialog`.
 
 ## Keyboard shortcuts
 
@@ -120,7 +140,9 @@ src/logmodel.*          live log and setup log
 src/searchmodel.*       in-output search results
 src/theme.*             icon palette + Hyprland rounding
 src/translator.*        Omarchy language, JSON catalogs, plural rules
-src/portalfilepicker.*  file dialogs over XDG Desktop Portal
+src/portalfilepicker.*  file dialogs over XDG Desktop Portal (Linux)
+src/platformfilepicker_*.cpp  native picker factory (portal / QFileDialog)
+src/windowsfilepicker.*  native Windows file dialogs
 src/Main.qml            window, keys, layout
 src/OptionsPanel.qml    action and command-specific options
 src/FilesPane.qml       file filter and content search
@@ -149,10 +171,13 @@ existing and future DeStruct flag behaves exactly as it does in a terminal.
 
 ## Limitations
 
-- Hermes `--decompile` is disabled in the current DeStruct version. The GUI
-  shows the `.hasm` assembly and points to `destruct assemble` in a terminal.
+- Hermes and Flutter decompilation are not supported by DeStruct 1.0.0-beta.4.
+  The GUI shows the `.hasm`/ARM64 assembly workflows and points to
+  `destruct assemble` in a terminal where relevant.
 - C decompilation is AArch64-only. Other architectures remain raw
   disassembly, and the toggle explains why it is disabled.
+- PE disassembly was removed from DeStruct beta.4; the GUI detects the file
+  and says so instead of offering a command that no longer exists.
 - `destruct hex` and the interactive REPL stay terminal tools: they are
   command-driven editors rather than batch jobs.
 - The setup build is intentionally simple: latest `main`, system toolchain,

@@ -1,7 +1,11 @@
 // destruct-gui — a keyboard-first window over the DeStruct decompiler.
 
 #include <QFileInfo>
+#ifdef Q_OS_WIN
+#include <QApplication>
+#else
 #include <QGuiApplication>
+#endif
 #include <QIcon>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
@@ -15,15 +19,26 @@
 
 int main(int argc, char *argv[])
 {
+#ifdef Q_OS_WIN
+    // QFileDialog needs widgets on Windows; everything else is the same
+    // QGuiApplication-based QML window.
+    QApplication app(argc, argv);
+#else
     QGuiApplication app(argc, argv);
+#endif
+    Q_INIT_RESOURCE(resources);
     app.setOrganizationName(QStringLiteral("destruct"));
     app.setApplicationName(QStringLiteral("destruct-gui"));
-    app.setApplicationVersion(QStringLiteral("0.1.0"));
+    app.setApplicationVersion(QStringLiteral("0.2.0"));
 
     // Matches the window to destruct-gui.desktop, so the compositor (Wayland
     // app_id) and the launcher pick up the installed icon.
     app.setDesktopFileName(QStringLiteral("destruct-gui"));
+#ifdef Q_OS_WIN
+    app.setWindowIcon(QIcon(QStringLiteral(":/destruct-gui.png")));
+#else
     app.setWindowIcon(QIcon::fromTheme(QStringLiteral("destruct-gui")));
+#endif
 
     QQuickStyle::setStyle(QStringLiteral("Material"));
 

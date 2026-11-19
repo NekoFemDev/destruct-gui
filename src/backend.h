@@ -36,9 +36,11 @@ class Backend : public QObject {
 
     Q_PROPERTY(QStringList availableCommands READ availableCommands NOTIFY commandsChanged)
     Q_PROPERTY(QString command READ command WRITE setCommand NOTIFY commandChanged)
+    Q_PROPERTY(bool outputUsed READ outputUsed NOTIFY commandChanged)
 
     Q_PROPERTY(QString outputPath READ outputPath WRITE setOutputPath NOTIFY outputChanged)
     Q_PROPERTY(QString metadataPath READ metadataPath NOTIFY metadataChanged)
+    Q_PROPERTY(QString elfMetadataPath READ elfMetadataPath NOTIFY elfMetadataChanged)
     Q_PROPERTY(QString offsetsPath READ offsetsPath NOTIFY offsetsChanged)
 
     Q_PROPERTY(bool decompile READ decompile WRITE setDecompile NOTIFY optionsChanged)
@@ -47,9 +49,7 @@ class Backend : public QObject {
     Q_PROPERTY(bool simplifyCfg READ simplifyCfg WRITE setSimplifyCfg NOTIFY optionsChanged)
     Q_PROPERTY(bool emitLLVM READ emitLLVM WRITE setEmitLLVM NOTIFY optionsChanged)
     Q_PROPERTY(bool regsAsVars READ regsAsVars WRITE setRegsAsVars NOTIFY optionsChanged)
-    Q_PROPERTY(bool noEnhance READ noEnhance WRITE setNoEnhance NOTIFY optionsChanged)
     Q_PROPERTY(bool noLocationComments READ noLocationComments WRITE setNoLocationComments NOTIFY optionsChanged)
-    Q_PROPERTY(bool deobfuscate READ deobfuscate WRITE setDeobfuscate NOTIFY optionsChanged)
     Q_PROPERTY(bool verbose READ verbose WRITE setVerbose NOTIFY optionsChanged)
 
     Q_PROPERTY(bool canRun READ canRun NOTIFY validationChanged)
@@ -117,9 +117,11 @@ public:
 
     QStringList availableCommands() const { return m_availableCommands; }
     QString command() const { return m_command; }
+    bool outputUsed() const { return m_command != QStringLiteral("elf-info"); }
 
     QString outputPath() const { return m_outputPath; }
     QString metadataPath() const { return m_metadataPath; }
+    QString elfMetadataPath() const { return m_elfMetadataPath; }
     QString offsetsPath() const { return m_offsetsPath; }
 
     bool decompile() const { return m_decompile; }
@@ -128,9 +130,7 @@ public:
     bool simplifyCfg() const { return m_simplifyCfg; }
     bool emitLLVM() const { return m_emitLLVM; }
     bool regsAsVars() const { return m_regsAsVars; }
-    bool noEnhance() const { return m_noEnhance; }
     bool noLocationComments() const { return m_noLocationComments; }
-    bool deobfuscate() const { return m_deobfuscate; }
     bool verbose() const { return m_verbose; }
 
     bool canRun() const { return !running() && m_validationCode.isEmpty(); }
@@ -183,6 +183,7 @@ public:
     Q_INVOKABLE void setInputPath(const QString &path);
     Q_INVOKABLE void acceptDrop(const QUrl &url);
     Q_INVOKABLE void setMetadataPath(const QString &path);
+    Q_INVOKABLE void setElfMetadataPath(const QString &path);
     Q_INVOKABLE void setOutputPath(const QString &path);
     Q_INVOKABLE void setOffsetsPath(const QString &path);
     Q_INVOKABLE void setBinaryPath(const QString &path);
@@ -194,13 +195,12 @@ public:
     void setSimplifyCfg(bool value);
     void setEmitLLVM(bool value);
     void setRegsAsVars(bool value);
-    void setNoEnhance(bool value);
     void setNoLocationComments(bool value);
-    void setDeobfuscate(bool value);
     void setVerbose(bool value);
 
     Q_INVOKABLE void chooseInput();
     Q_INVOKABLE void chooseMetadata();
+    Q_INVOKABLE void chooseElfMetadata();
     Q_INVOKABLE void chooseOutput();
     Q_INVOKABLE void chooseOffsets();
     Q_INVOKABLE void chooseBinary();
@@ -228,6 +228,7 @@ signals:
     void commandChanged();
     void outputChanged();
     void metadataChanged();
+    void elfMetadataChanged();
     void offsetsChanged();
     void optionsChanged();
     void validationChanged();
@@ -286,6 +287,7 @@ private:
 
     QString m_outputPath;
     QString m_metadataPath;
+    QString m_elfMetadataPath;
     QString m_offsetsPath;
 
     bool m_decompile = false;
@@ -294,9 +296,7 @@ private:
     bool m_simplifyCfg = false;
     bool m_emitLLVM = false;
     bool m_regsAsVars = false;
-    bool m_noEnhance = false;
     bool m_noLocationComments = false;
-    bool m_deobfuscate = false;
     bool m_verbose = false;
 
     QString m_validationCode;
